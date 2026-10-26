@@ -13,6 +13,12 @@ ENV/
 .coverage
 htmlcov/
 
+# Build artifacts & distributions
+build/
+dist/
+*.egg-info/
+*.whl
+
 # Local databases & run data
 starfall.db
 config/calibration.json
