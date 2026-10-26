@@ -390,15 +390,15 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1793005058.8431587,
-    "seen": 1793005182.675013,
-    "ast_hash": "df708646183c7227e543ec1d757ceb0b",
+    "mtime": 1793006748.34418,
+    "seen": 1793006757.206249,
+    "ast_hash": "8a59e34c69f55882a78db9d45c55a7a2",
     "semantic_hash": ""
   },
   "requirements.txt": {
-    "mtime": 1793004994.1754858,
-    "seen": 1793005182.675018,
-    "ast_hash": "3a7921be4c0ea7b63d28c003f8705013",
+    "mtime": 1793006315.6801612,
+    "seen": 1793006757.2062562,
+    "ast_hash": "9b3d376d5f74b27342af03c39ebbbcc4",
     "semantic_hash": ""
   },
   "web/index.html": {
@@ -444,9 +444,51 @@
     "semantic_hash": ""
   },
   "vercel.json": {
-    "mtime": 1793005438.9163013,
-    "seen": 1793005641.8787851,
-    "ast_hash": "7499628d1b515acc3201387955f17b36",
+    "mtime": 1793006342.111267,
+    "seen": 1793006757.206244,
+    "ast_hash": "81966a896ff6a309a18d410f8a6808b1",
+    "semantic_hash": ""
+  },
+  "api/index.py": {
+    "mtime": 1793006385.7125921,
+    "seen": 1793006757.206215,
+    "ast_hash": "4a5bb4803c1b2b53a21cc9fe8dff1f0a",
+    "semantic_hash": ""
+  },
+  "public/app.js": {
+    "mtime": 1793006585.8269346,
+    "seen": 1793006757.206229,
+    "ast_hash": "207d36ca7a2dc76a09d4342ed20852bb",
+    "semantic_hash": ""
+  },
+  "tests/test_fastapi_serverless.py": {
+    "mtime": 1793006629.878762,
+    "seen": 1793006757.2062368,
+    "ast_hash": "6ad1d630c4117359dad5e18abc453fe1",
+    "semantic_hash": ""
+  },
+  "api/requirements.txt": {
+    "mtime": 1793006323.5480177,
+    "seen": 1793006757.206249,
+    "ast_hash": "9b3d376d5f74b27342af03c39ebbbcc4",
+    "semantic_hash": ""
+  },
+  "docs/DEPLOYMENT.md": {
+    "mtime": 1793006720.1223855,
+    "seen": 1793006757.206252,
+    "ast_hash": "c2eb8db8312c913155c272d38d62da3f",
+    "semantic_hash": ""
+  },
+  "public/index.html": {
+    "mtime": 1793006482.067874,
+    "seen": 1793006757.206254,
+    "ast_hash": "24cd28ce6f4e672b56a26ac8e045b14a",
+    "semantic_hash": ""
+  },
+  "requirements-desktop.txt": {
+    "mtime": 1793006307.7222972,
+    "seen": 1793006757.2062552,
+    "ast_hash": "875ab6c7e624b114b2bb5a0a5f86a03e",
     "semantic_hash": ""
   }
 }

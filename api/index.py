@@ -174,6 +174,7 @@ class AnalyzeRequest(BaseModel):
 # ==============================================================================
 
 @app.get("/api/health", summary="Service and Model Health Diagnostics")
+@app.get("/health", summary="Service and Model Health Diagnostics (Bare Path)")
 async def health_check() -> Dict[str, Any]:
     """
     Check the health of the STARFALL service and probe reachability of the
@@ -199,6 +200,7 @@ async def health_check() -> Dict[str, Any]:
 
 
 @app.get("/api/config", summary="Safe Client Game Configuration")
+@app.get("/config", summary="Safe Client Game Configuration (Bare Path)")
 async def get_client_config() -> Dict[str, Any]:
     """
     Provide public, safe configuration data for the browser arcade game.
@@ -233,6 +235,7 @@ async def get_client_config() -> Dict[str, Any]:
 
 
 @app.post("/api/strategy", response_model=StrategyResponse, summary="Request Bounded Wave Strategy")
+@app.post("/strategy", response_model=StrategyResponse, summary="Request Bounded Wave Strategy (Bare Path)")
 async def request_strategy(payload: StrategyRequest) -> StrategyResponse:
     """
     Evaluate player telemetry and return a validated, bounded tactical plan.
@@ -337,6 +340,7 @@ async def request_strategy(payload: StrategyRequest) -> StrategyResponse:
 
 
 @app.post("/api/analyze", summary="Generate Post-Match Flight Debrief")
+@app.post("/analyze", summary="Generate Post-Match Flight Debrief (Bare Path)")
 async def analyze_match(payload: AnalyzeRequest) -> Dict[str, Any]:
     """
     Produce a structured post-game flight debrief with measured facts,
@@ -386,6 +390,35 @@ async def analyze_match(payload: AnalyzeRequest) -> Dict[str, Any]:
     }
 
 
+@app.get("/api/status", summary="Companion Model Status")
+@app.get("/status", summary="Companion Model Status (Bare Path)")
+async def get_companion_status() -> Dict[str, Any]:
+    host = get_ollama_host()
+    configured_model = get_configured_model()
+    reachable, installed = await check_ollama_reachability(host, timeout=1.5)
+    return {
+        "ai": {
+            "endpoint": host,
+            "ollama_online": reachable,
+            "primary_model": configured_model,
+            "installed_models": installed,
+            "ollama_message": "Ollama service operational" if reachable else "Ollama offline; fallback active",
+        }
+    }
+
+
+@app.get("/api/matches", summary="Recent Matches")
+@app.get("/matches", summary="Recent Matches (Bare Path)")
+async def get_recent_matches() -> Dict[str, Any]:
+    return {"matches": []}
+
+
+@app.get("/api/match/last", summary="Last Match Report")
+@app.get("/match/last", summary="Last Match Report (Bare Path)")
+async def get_last_match() -> Dict[str, Any]:
+    return {"report": None}
+
+
 # ==============================================================================
 # STATIC ASSETS MOUNT (FOR LOCAL TESTING & ASGI EXECUTION)
 # ==============================================================================
@@ -393,3 +426,4 @@ async def analyze_match(payload: AnalyzeRequest) -> Dict[str, Any]:
 PUBLIC_DIR = ROOT_DIR / "public"
 if PUBLIC_DIR.is_dir():
     app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
+

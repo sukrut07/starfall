@@ -453,14 +453,87 @@ if __name__ == "__main__":
     main()
 
 
-# Vercel / WSGI Serverless Entrypoint Fallback
-def handler(environ, start_response):
-    status = "200 OK"
-    headers = [("Content-type", "application/json; charset=utf-8")]
-    start_response(status, headers)
-    return [b'{"status":"ok","message":"STARFALL Companion API"}\n']
+# ==============================================================================
+# VERCEL MULTI-SERVICE ENTRYPOINT ('app' SERVICE)
+# ==============================================================================
+# In Vercel Services mode, 'app' is the public-facing service serving the frontend
+# and communicating with the internal 'api' service via the injected API_URL binding.
+
+from fastapi import FastAPI, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
+import httpx
+
+app = FastAPI(
+    title="STARFALL Web Gateway Service",
+    description="Public frontend service communicating with internal API service via Vercel service binding",
+    version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-app = handler
-application = handler
+@app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"])
+async def proxy_to_internal_api(request: Request, path: str):
+    """
+    Proxy requests to the internal 'api' service using the Vercel-injected API_URL binding.
+    Falls back gracefully to local in-process handler if running outside Vercel services.
+    """
+    api_url = os.environ.get("API_URL", "").rstrip("/")
+    if api_url:
+        target_url = f"{api_url}/api/{path}"
+        req_headers = dict(request.headers)
+        req_headers.pop("host", None)
+        body = await request.body()
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.request(
+                method=request.method,
+                url=target_url,
+                params=request.query_params,
+                headers=req_headers,
+                content=body,
+            )
+            return Response(
+                content=resp.content,
+                status_code=resp.status_code,
+                headers=dict(resp.headers),
+            )
+    else:
+        # Local standalone fallback: delegate to local api module
+        try:
+            from api.index import app as local_api
+            async with httpx.AsyncClient(transport=httpx.ASGITransport(app=local_api), base_url="http://testserver") as client:
+                resp = await client.request(
+                    method=request.method,
+                    url=f"/api/{path}",
+                    params=request.query_params,
+                    content=await request.body(),
+                    headers=dict(request.headers),
+                )
+                return Response(
+                    content=resp.content,
+                    status_code=resp.status_code,
+                    headers=dict(resp.headers),
+                )
+        except Exception as e:
+            return JSONResponse(
+                status_code=503,
+                content={"status": "error", "message": f"API service unavailable: {str(e)}"},
+            )
+
+
+# Mount public static assets at / for the 'app' web service
+PUBLIC_DIR = ROOT_DIR / "public"
+if PUBLIC_DIR.is_dir():
+    app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
+
+handler = app
+application = app
 
