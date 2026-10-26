@@ -351,7 +351,7 @@ async def generate_gemma_debrief(
     """
     host = get_ollama_host()
     model = get_configured_model()
-    timeout = min(15.0, max(10.0, get_timeout_seconds() * 2.5))
+    timeout = float(os.getenv("OLLAMA_DEBRIEF_TIMEOUT", "25.0"))
 
     acc_pct = payload.accuracy * 100.0
     dodges = payload.dodges
@@ -449,15 +449,26 @@ async def generate_gemma_debrief(
                     "prompt": prompt,
                     "stream": False,
                     "format": "json",
-                    "options": {"temperature": 0.3, "num_predict": 384},
+                    "options": {"temperature": 0.2, "num_predict": 1024},
                 },
             )
             if resp.status_code == 200:
                 data = resp.json()
-                raw_text = data.get("response", "{}")
+                raw_text = data.get("response", "").strip()
+                if not raw_text or "{" not in raw_text:
+                    thinking_text = data.get("thinking", "")
+                    if "{" in thinking_text:
+                        import re
+                        m = re.findall(r"\{[^{}]*\"(?:combat_grade|performance_summary)\"[^{}]*\}", thinking_text, re.DOTALL)
+                        if m:
+                            raw_text = m[-1]
+                if "```json" in raw_text:
+                    raw_text = raw_text.split("```json")[1].split("```")[0].strip()
+                elif "```" in raw_text:
+                    raw_text = raw_text.split("```")[1].split("```")[0].strip()
                 import json
                 parsed = json.loads(raw_text)
-                if isinstance(parsed, dict) and "combat_grade" in parsed and "performance_summary" in parsed:
+                if isinstance(parsed, dict) and ("combat_grade" in parsed or "performance_summary" in parsed):
                     return {
                         "combat_grade": str(parsed.get("combat_grade", default_grade)),
                         "performance_summary": str(parsed.get("performance_summary", fallback_analysis["performance_summary"])),
