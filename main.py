@@ -16,7 +16,7 @@ try:
     from dotenv import load_dotenv
 except ImportError:
     load_dotenv = None
-from typing import Optional
+from typing import Any, Optional
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 
@@ -25,49 +25,44 @@ ROOT_DIR = Path(__file__).parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from config.loader import Settings, load_settings
-from game.engine import GameEngine
-from game.state import GameStatus, InputCommand
-from controls.keyboard import PygameKeyboardController, TerminalKeyboardController
-from controls.gesture import GestureController
-from controls.calibration import load_calibration
-from renderers.terminal_renderer import TerminalRenderer
-from renderers.pygame_renderer import PygameRenderer
-from analytics.telemetry import TelemetryCollector
-from analytics.metrics import compute_metrics
-from analytics.player_profile import build_profile
-from analytics.reports import PostGameReport, generate_next_mission
-from analytics.strategy_evaluation import StrategyOutcome
-from persistence.database import init_database
-from persistence.repositories import MatchRepository
-from ai.strategy_graph import AIStrategyOrchestrator
-from ui.terminal_menu import display_main_menu
-from ui.results_screen import print_rich_report
-from ui.settings_menu import display_settings_summary
-from scripts.check_environment import check_all
-from scripts.setup_ollama import setup_and_diagnose
-from scripts.test_camera import run_camera_test
-
-try:
-    import pygame
-    PYGAME_MODULE_AVAILABLE = True
-except ImportError:
-    PYGAME_MODULE_AVAILABLE = False
-
 
 def run_game(
     renderer_type: str = "pygame",
     control_type: str = "keyboard",
     model_name: Optional[str] = None,
-    settings_override: Optional[Settings] = None,
+    settings_override: Optional[Any] = None,
 ) -> None:
     """Launch the main game loop with chosen renderer and control interfaces."""
+    from config.loader import Settings, load_settings
+    from game.engine import GameEngine
+    from game.state import GameStatus, InputCommand
+    from controls.keyboard import PygameKeyboardController, TerminalKeyboardController
+    from controls.gesture import GestureController
+    from controls.calibration import load_calibration
+    from renderers.terminal_renderer import TerminalRenderer
+    from renderers.pygame_renderer import PygameRenderer
+    from analytics.telemetry import TelemetryCollector
+    from analytics.metrics import compute_metrics
+    from analytics.player_profile import build_profile
+    from analytics.reports import PostGameReport, generate_next_mission
+    from analytics.strategy_evaluation import StrategyOutcome
+    from persistence.database import init_database
+    from persistence.repositories import MatchRepository
+    from ai.strategy_graph import AIStrategyOrchestrator
+    from ui.results_screen import print_rich_report
+
+    try:
+        import pygame
+        pygame_module_available = True
+    except ImportError:
+        pygame_module_available = False
+
     settings = settings_override or load_settings()
     if model_name:
         settings.ai.primary_model = model_name
 
     # Validate Pygame availability if requested
-    if renderer_type == "pygame" and not PYGAME_MODULE_AVAILABLE:
+    if renderer_type == "pygame" and not pygame_module_available:
         print("[Warning] Pygame not found in this environment. Falling back to Terminal mode.")
         renderer_type = "terminal"
 
@@ -286,6 +281,16 @@ def main() -> None:
     # Load local .env values before CLI defaults; existing OS environment still wins.
     if load_dotenv is not None:
         load_dotenv(dotenv_path=ROOT_DIR / ".env", override=False)
+
+    from config.loader import load_settings
+    from persistence.database import init_database
+    from persistence.repositories import MatchRepository
+    from ui.terminal_menu import display_main_menu
+    from ui.results_screen import print_rich_report
+    from ui.settings_menu import display_settings_summary
+    from scripts.check_environment import check_all
+    from scripts.setup_ollama import setup_and_diagnose
+    from scripts.test_camera import run_camera_test
 
     parser = argparse.ArgumentParser(
         description="STARFALL: Adaptive AI Arcade Shooter (Terminal / Pygame, Keyboard / Hand Gestures, Gemma 4 & LangGraph)",
