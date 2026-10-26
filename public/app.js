@@ -870,6 +870,16 @@
       strategies_applied: state.telemetry.appliedStrategies,
     };
 
+    // Set immediate loading states in UI
+    const goGrade = document.getElementById("go-grade-chip");
+    if (goGrade) goGrade.textContent = "ANALYZING...";
+    const goLead = document.getElementById("go-ai-summary");
+    if (goLead) goLead.textContent = "Gemma 4 neural director synthesizing flight telemetry...";
+    const debGrade = document.getElementById("deb-grade");
+    if (debGrade) debGrade.textContent = "GRADE: EVALUATING...";
+    const debSummary = document.getElementById("deb-gemma-summary");
+    if (debSummary) debSummary.textContent = "Gemma 4 analyzing combat telemetry, hostile formations, and pilot evasions...";
+
     try {
       const res = await fetch("/api/analyze", {
         method: "POST",
@@ -881,7 +891,9 @@
       const debrief = await res.json();
       populateDebriefModal(debrief);
     } catch (err) {
-      // Fallback local report population
+      // High-fidelity fallback local report population
+      const accPct = accuracy * 100;
+      const grade = payload.waves_completed >= 3 ? "A-Tier Veteran" : (accPct >= 50 ? "B-Tier Pilot" : "C-Tier Cadet");
       populateDebriefModal({
         match_id: payload.match_id,
         total_score: payload.total_score,
@@ -889,6 +901,16 @@
         survival_seconds: payload.survival_seconds,
         accuracy: payload.accuracy,
         dodges: payload.dodges,
+        movement_distribution: payload.movement_distribution,
+        gemma_analysis: {
+          combat_grade: grade,
+          performance_summary: `Pilot sustained flight for ${payload.survival_seconds.toFixed(1)}s across ${payload.waves_completed} waves with ${accPct.toFixed(1)}% firing accuracy and ${payload.dodges} evasive maneuvers.`,
+          tactical_breakdown: `Stationary quotient ${(payload.camping_ratio * 100).toFixed(0)}% required active lateral adjustments during pincer formations.`,
+          key_strength: payload.dodges >= 3 ? "Reflexive close-range projectile dodging" : "Focused forward weapon precision",
+          fatal_flaw: payload.camping_ratio > 0.25 ? "Stationary drift limited escape trajectory" : "Hostile crossfire density overwhelmed hull defenses",
+          next_mission_directive: `Attain >60% accuracy and complete wave ${payload.waves_completed + 1}.`,
+          is_ai_generated: false,
+        },
         profile: {
           playstyle_tag: accuracy > 0.6 ? "Precision Marksman" : "Dynamic Scout",
           observed_weakness: "Lateral quadrant positioning biased during pincer formations.",
@@ -909,6 +931,63 @@
     document.getElementById("deb-accuracy").textContent = `${(data.accuracy * 100).toFixed(1)}%`;
     document.getElementById("deb-dodges").textContent = data.dodges;
 
+    // 1. Populate Gemma 4 Neural Combat Debrief
+    const gemma = data.gemma_analysis || {};
+    const grade = gemma.combat_grade || "B-Tier Pilot";
+    const debGrade = document.getElementById("deb-grade");
+    if (debGrade) debGrade.textContent = `GRADE: ${grade.toUpperCase()}`;
+
+    const debSource = document.getElementById("deb-ai-source");
+    if (debSource) {
+      debSource.textContent = gemma.is_ai_generated ? "GEMMA 4 MLX ACTIVE" : "TACTICAL ENGINE EVALUATION";
+    }
+
+    const debSum = document.getElementById("deb-gemma-summary");
+    if (debSum) debSum.textContent = gemma.performance_summary || "Pilot telemetry evaluated across wave engagements.";
+
+    const debBreak = document.getElementById("deb-gemma-breakdown");
+    if (debBreak) debBreak.textContent = gemma.tactical_breakdown || "Combat rhythm and quadrant positioning evaluated.";
+
+    const debStr = document.getElementById("deb-gemma-strength");
+    if (debStr) debStr.textContent = gemma.key_strength || "Close-range evasion reflexes.";
+
+    const debFlaw = document.getElementById("deb-gemma-flaw");
+    if (debFlaw) debFlaw.textContent = gemma.fatal_flaw || "Delayed lateral reaction against converging projectile waves.";
+
+    // 2. Populate Game Over Quick AI Intel Card
+    const goGrade = document.getElementById("go-grade-chip");
+    if (goGrade) goGrade.textContent = grade.toUpperCase();
+
+    const goLead = document.getElementById("go-ai-summary");
+    if (goLead) goLead.textContent = gemma.performance_summary || "Pilot telemetry evaluated.";
+
+    const goStats = document.getElementById("go-ai-stats");
+    if (goStats) {
+      goStats.innerHTML = `
+        <span style="color:var(--accent-green);">&#x2714; Strength:</span> ${gemma.key_strength || "Evasion reflexes"} &bull;
+        <span style="color:var(--accent-red);">&#x26A0; Flaw:</span> ${gemma.fatal_flaw || "Pincer vulnerability"}
+      `;
+    }
+
+    // 3. Populate Spatial Quadrant Bar
+    const mDist = data.movement_distribution || (data.metrics ? {
+      left: data.metrics.left_zone_ratio,
+      center: data.metrics.center_zone_ratio,
+      right: data.metrics.right_zone_ratio
+    } : { left: 0.33, center: 0.34, right: 0.33 });
+
+    const pLeft = Math.round((mDist.left || 0.33) * 100);
+    const pCenter = Math.round((mDist.center || 0.34) * 100);
+    const pRight = Math.max(0, 100 - pLeft - pCenter);
+
+    const barL = document.getElementById("bar-left");
+    const barC = document.getElementById("bar-center");
+    const barR = document.getElementById("bar-right");
+    if (barL) { barL.style.width = `${pLeft}%`; barL.textContent = `PORT ${pLeft}%`; }
+    if (barC) { barC.style.width = `${pCenter}%`; barC.textContent = `CENTER ${pCenter}%`; }
+    if (barR) { barR.style.width = `${pRight}%`; barR.textContent = `STARBOARD ${pRight}%`; }
+
+    // 4. Playstyle Profile & Next Mission
     const prof = data.profile || {};
     document.getElementById("deb-profile-summary").innerHTML = `
       <strong>Classification:</strong> <span style="color:var(--accent-cyan); font-weight:700;">${prof.playstyle_tag || "Cadet Pilot"}</span><br>
@@ -918,7 +997,7 @@
     const miss = data.next_mission || {};
     document.getElementById("deb-next-mission").innerHTML = `
       <strong>${miss.title || "Combat Calisthenics"}</strong> &mdash; ${miss.rationale || "Maintain active tactical maneuvering."}<br>
-      <span style="color:var(--accent-yellow); font-weight:700;">Target Goal:</span> ${miss.measurement_description || "Clear 3 waves with > 50% accuracy."}
+      <span style="color:var(--accent-yellow); font-weight:700;">Target Goal:</span> ${gemma.next_mission_directive || miss.measurement_description || "Clear 3 waves with > 50% accuracy."}
     `;
   }
 
@@ -1481,6 +1560,10 @@
   });
   document.getElementById("btn-close-debrief")?.addEventListener("click", () => {
     document.getElementById("debriefModal").classList.add("hidden");
+  });
+  document.getElementById("btn-redeploy-from-deb")?.addEventListener("click", () => {
+    document.getElementById("debriefModal").classList.add("hidden");
+    startGame();
   });
 
   // Mode Selection (Keyboard vs Gesture)

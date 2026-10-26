@@ -127,9 +127,25 @@
             <p class="overlay-desc" id="game-over-summary">
               Final Score: 0 &bull; Waves Cleared: 0 &bull; Accuracy: 0%
             </p>
+
+            <!-- GEMMA 4 QUICK POST-MATCH INTEL CARD -->
+            <div class="game-over-ai-card" id="gameOverAiCard">
+              <div class="ai-card-header">
+                <span class="ai-chip">&#x1F916; GEMMA 4 COMBAT EVALUATION</span>
+                <span class="combat-grade-chip" id="go-grade-chip">EVALUATING...</span>
+              </div>
+              <p class="ai-card-lead" id="go-ai-summary">
+                Analyzing combat telemetry, projectile dodges, and spatial evasions...
+              </p>
+              <div class="ai-card-stats" id="go-ai-stats">
+                <span id="go-stat-strength">Key Strength: Assessing...</span> &bull;
+                <span id="go-stat-weakness">Vulnerability: Diagnosing...</span>
+              </div>
+            </div>
+
             <div class="overlay-actions">
-              <button class="btn-primary-action" id="btn-retry-game">REDEPLOY INTERCEPTOR</button>
-              <button class="btn-secondary-action" id="btn-show-debrief">VIEW FLIGHT DEBRIEF &UpperRightArrow;</button>
+              <button class="btn-primary-action" id="btn-retry-game">REDEPLOY INTERCEPTOR [R]</button>
+              <button class="btn-secondary-action active-glow" id="btn-show-debrief">VIEW FULL TACTICAL DEBRIEF &UpperRightArrow;</button>
             </div>
           </div>
 
@@ -273,7 +289,10 @@
   <div class="modal-backdrop hidden" id="debriefModal">
     <div class="debrief-card">
       <div class="debrief-header">
-        <h2 class="debrief-title">FLIGHT DEBRIEF &amp; EVALUATION</h2>
+        <div class="debrief-header-top">
+          <h2 class="debrief-title">FLIGHT DEBRIEF &amp; EVALUATION</h2>
+          <div class="combat-grade-badge" id="deb-grade">GRADE: EVALUATING...</div>
+        </div>
         <div class="debrief-match-meta" id="debrief-meta-line">MATCH ID: -- &bull; TIMESTAMP: --</div>
       </div>
 
@@ -296,9 +315,42 @@
         </div>
       </div>
 
+      <!-- GEMMA 4 NEURAL FLIGHT DEBRIEF -->
+      <div class="debrief-section-box gemma-box">
+        <div class="section-box-title ai-purple">
+          <span>&#x1F916; GEMMA 4 COMBAT DIRECTIVE &amp; ANALYSIS</span>
+          <span class="ai-source-tag" id="deb-ai-source">NEURAL INFERENCE ACTIVE</span>
+        </div>
+        <div class="gemma-lead-text" id="deb-gemma-summary">
+          Synthesizing flight trajectory, hostile projectile evasions, and engagement pacing...
+        </div>
+        <div class="gemma-breakdown-grid">
+          <div class="gemma-chip-item">
+            <span class="chip-label cyan">&#x25C9; TACTICAL BREAKDOWN</span>
+            <p class="chip-content" id="deb-gemma-breakdown">Analyzing combat rhythm and positional dynamics...</p>
+          </div>
+          <div class="gemma-chip-item strength">
+            <span class="chip-label green">&#x2714; KEY COMBAT STRENGTH</span>
+            <p class="chip-content" id="deb-gemma-strength">Calculating primary asset...</p>
+          </div>
+          <div class="gemma-chip-item flaw">
+            <span class="chip-label red">&#x26A0; FATAL VULNERABILITY</span>
+            <p class="chip-content" id="deb-gemma-flaw">Diagnosing critical failure mode...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPATIAL QUADRANT DISTRIBUTION -->
       <div class="debrief-section-box">
-        <div class="section-box-title">PLAYSTYLE PROFILE &amp; HABIT ANALYSIS</div>
-        <div class="section-box-body" id="deb-profile-summary">
+        <div class="section-box-title">SPATIAL DRIFT &amp; QUADRANT DISTRIBUTION</div>
+        <div class="quadrant-bar-container">
+          <div class="quadrant-bar">
+            <div class="bar-segment left" id="bar-left" style="width: 33%;">PORT 33%</div>
+            <div class="bar-segment center" id="bar-center" style="width: 34%;">CENTER 34%</div>
+            <div class="bar-segment right" id="bar-right" style="width: 33%;">STARBOARD 33%</div>
+          </div>
+        </div>
+        <div class="section-box-body" id="deb-profile-summary" style="margin-top: 10px;">
           Analyzing movement distribution and firing habits across combat waves...
         </div>
       </div>
@@ -310,7 +362,8 @@
         </div>
       </div>
 
-      <div class="overlay-actions" style="justify-content: flex-end;">
+      <div class="overlay-actions" style="justify-content: flex-end; gap: 10px;">
+        <button class="btn-secondary-action" id="btn-redeploy-from-deb">REDEPLOY INTERCEPTOR</button>
         <button class="btn-primary-action" id="btn-close-debrief">DISMISS DEBRIEF</button>
       </div>
     </div>

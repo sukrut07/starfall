@@ -166,7 +166,7 @@ class AnalyzeRequest(BaseModel):
         default_factory=lambda: {"left": 0.33, "center": 0.34, "right": 0.33}
     )
     camping_ratio: float = Field(default=0.0, ge=0.0, le=1.0)
-    strategies_applied: List[Dict[str, Any]] = Field(default_factory=list)
+    strategies_applied: List[Any] = Field(default_factory=list)
 
 
 # ==============================================================================
@@ -339,12 +339,147 @@ async def request_strategy(payload: StrategyRequest) -> StrategyResponse:
     )
 
 
+async def generate_gemma_debrief(
+    payload: AnalyzeRequest,
+    metrics: AggregatedMetrics,
+    profile: Any,
+    next_mission: Any,
+) -> Dict[str, Any]:
+    """
+    Synthesize an intelligent post-mission evaluation of what the gameplay was
+    and how the pilot performed using Gemma 4 via Ollama, with high-fidelity fallback.
+    """
+    host = get_ollama_host()
+    model = get_configured_model()
+    timeout = min(15.0, max(10.0, get_timeout_seconds() * 2.5))
+
+    acc_pct = payload.accuracy * 100.0
+    dodges = payload.dodges
+    waves = payload.waves_completed
+    camping = payload.camping_ratio * 100.0
+
+    if waves >= 4 or (acc_pct >= 75.0 and dodges >= 6):
+        default_grade = "S-Tier Ace"
+    elif waves >= 2 or (acc_pct >= 55.0 and dodges >= 3):
+        default_grade = "A-Tier Veteran"
+    elif waves >= 1 or acc_pct >= 35.0:
+        default_grade = "B-Tier Pilot"
+    else:
+        default_grade = "C-Tier Cadet"
+
+    movement_desc = "balanced lateral quadrant coverage"
+    left_r = payload.movement_distribution.get("left", 0.33)
+    right_r = payload.movement_distribution.get("right", 0.33)
+    if left_r > 0.45:
+        movement_desc = "heavy port-side (left) drift bias"
+    elif right_r > 0.45:
+        movement_desc = "heavy starboard (right) drift bias"
+    elif payload.camping_ratio > 0.35:
+        movement_desc = "high stationary camping in mid-channel"
+
+    fallback_analysis = {
+        "combat_grade": default_grade,
+        "performance_summary": (
+            f"Pilot sustained combat operations for {payload.survival_seconds:.1f}s with {acc_pct:.1f}% firing accuracy and {dodges} threat evasions. "
+            f"Maneuvering exhibited {movement_desc}, surviving across {payload.waves_completed} hostile wave deployments."
+        ),
+        "tactical_breakdown": (
+            f"Telemetry records {payload.shots_hit}/{max(1, payload.shots_fired)} weapon hits with a camping quotient of {camping:.0f}%. "
+            f"Pincer and spread wave adaptations forced lateral evasion, highlighting {movement_desc} under combat stress."
+        ),
+        "key_strength": (
+            f"Exceptional close-range projectile evasion ({dodges} clean dodges)"
+            if dodges >= 3
+            else f"Consistent cannon fire accuracy ({acc_pct:.1f}%)"
+        ),
+        "fatal_flaw": (
+            f"Stationary camping quotient ({camping:.0f}%) limited rapid interceptor repositioning"
+            if payload.camping_ratio > 0.25
+            else "Delayed lateral reaction against converging projectile waves"
+        ),
+        "next_mission_directive": next_mission.measurement_description if hasattr(next_mission, "measurement_description") else f"Achieve >60% accuracy and clear wave {payload.waves_completed + 1}.",
+        "source": "deterministic_analysis",
+        "is_ai_generated": False,
+    }
+
+    if not is_ai_enabled():
+        return fallback_analysis
+
+    try:
+        if payload.strategies_applied:
+            formations_list = []
+            for item in payload.strategies_applied:
+                if isinstance(item, dict):
+                    formations_list.append(str(item.get("formation", "wave")))
+                else:
+                    formations_list.append(str(item))
+            formations_str = ", ".join(formations_list)
+        else:
+            formations_str = "standard tactical waves"
+
+        prompt = (
+            f"You are the STARFALL Tactical Fleet Commander AI running Gemma 4.\n"
+            f"Analyze this combat mission debrief based on measured pilot telemetry:\n"
+            f"- Total Score: {payload.total_score:,} pts\n"
+            f"- Waves Cleared: {payload.waves_completed}\n"
+            f"- Combat Survival Time: {payload.survival_seconds:.1f}s\n"
+            f"- Firing Precision (Accuracy): {payload.accuracy:.1%}\n"
+            f"- Shots Fired / Hit: {payload.shots_fired} / {payload.shots_hit}\n"
+            f"- Close-Range Dodges: {payload.dodges}\n"
+            f"- Spatial Movement Distribution: Left={left_r:.0%}, Center={payload.movement_distribution.get('center', 0.34):.0%}, Right={right_r:.0%}\n"
+            f"- Stationary Camping Ratio: {camping:.0f}%\n"
+            f"- Enemy Formations Encountered: {formations_str}\n\n"
+            f"Evaluate what the gameplay was like and how the pilot performed. "
+            f"Respond ONLY with valid JSON with these keys:\n"
+            f"{{\n"
+            f'  "combat_grade": "<S-Tier Ace | A-Tier Veteran | B-Tier Pilot | C-Tier Cadet>",\n'
+            f'  "performance_summary": "<2-3 sentence engaging analysis of what the gameplay was like and how the pilot handled threats>",\n'
+            f'  "tactical_breakdown": "<detailed observation of pilot habits, spatial positioning bias, and combat rhythm>",\n'
+            f'  "key_strength": "<the pilot\'s greatest asset in this run>",\n'
+            f'  "fatal_flaw": "<the vulnerability or tendency that led to hull compromise>",\n'
+            f'  "next_mission_directive": "<actionable tactical challenge for their next flight>"\n'
+            f"}}"
+        )
+
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.post(
+                f"{host}/api/generate",
+                json={
+                    "model": model,
+                    "prompt": prompt,
+                    "stream": False,
+                    "format": "json",
+                    "options": {"temperature": 0.3, "num_predict": 384},
+                },
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                raw_text = data.get("response", "{}")
+                import json
+                parsed = json.loads(raw_text)
+                if isinstance(parsed, dict) and "combat_grade" in parsed and "performance_summary" in parsed:
+                    return {
+                        "combat_grade": str(parsed.get("combat_grade", default_grade)),
+                        "performance_summary": str(parsed.get("performance_summary", fallback_analysis["performance_summary"])),
+                        "tactical_breakdown": str(parsed.get("tactical_breakdown", fallback_analysis["tactical_breakdown"])),
+                        "key_strength": str(parsed.get("key_strength", fallback_analysis["key_strength"])),
+                        "fatal_flaw": str(parsed.get("fatal_flaw", fallback_analysis["fatal_flaw"])),
+                        "next_mission_directive": str(parsed.get("next_mission_directive", fallback_analysis["next_mission_directive"])),
+                        "source": f"gemma4_{model}",
+                        "is_ai_generated": True,
+                    }
+    except Exception as exc:
+        print(f"[STARFALL] Gemma debrief generation error: {exc}")
+
+    return fallback_analysis
+
+
 @app.post("/api/analyze", summary="Generate Post-Match Flight Debrief")
 @app.post("/analyze", summary="Generate Post-Match Flight Debrief (Bare Path)")
 async def analyze_match(payload: AnalyzeRequest) -> Dict[str, Any]:
     """
     Produce a structured post-game flight debrief with measured facts,
-    playstyle classification, adaptation history, and a concrete next-run mission.
+    Gemma-powered combat narrative, playstyle classification, and a concrete next-run mission.
     """
     # Build AggregatedMetrics from client payload
     metrics = AggregatedMetrics(
@@ -372,6 +507,9 @@ async def analyze_match(payload: AnalyzeRequest) -> Dict[str, Any]:
     profile = build_profile(metrics)
     next_mission = generate_next_mission(metrics, profile)
 
+    # Generate Gemma 4 Intelligent Debrief
+    gemma_eval = await generate_gemma_debrief(payload, metrics, profile, next_mission)
+
     return {
         "match_id": payload.match_id,
         "total_score": payload.total_score,
@@ -387,6 +525,7 @@ async def analyze_match(payload: AnalyzeRequest) -> Dict[str, Any]:
         "profile": profile.to_dict(),
         "adaptation_history": payload.strategies_applied,
         "next_mission": next_mission.to_dict(),
+        "gemma_analysis": gemma_eval,
     }
 
 

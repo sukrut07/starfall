@@ -892,11 +892,212 @@ body {
 }
 
 /* =============================================================
+   GEMMA 4 POST-MATCH DEBRIEF STYLES
+============================================================= */
+.debrief-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.combat-grade-badge {
+  font-family: var(--font-pixel);
+  font-size: 18px;
+  color: #00e5ff;
+  background: rgba(0, 229, 255, 0.12);
+  border: 1px solid var(--accent-cyan);
+  padding: 4px 12px;
+  letter-spacing: 0.08em;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
+  animation: pulse-glow 2.5s infinite;
+}
+
+.debrief-section-box.gemma-box {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(10, 10, 18, 0.95) 100%);
+  border-left: 3px solid #a855f7;
+  border-top: 1px solid rgba(168, 85, 247, 0.2);
+  border-right: 1px solid rgba(168, 85, 247, 0.1);
+  border-bottom: 1px solid rgba(168, 85, 247, 0.1);
+  padding: 16px;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.12);
+}
+
+.section-box-title.ai-purple {
+  color: #c084fc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ai-source-tag {
+  font-size: 9px;
+  background: rgba(168, 85, 247, 0.2);
+  color: #d8b4fe;
+  border: 1px solid #a855f7;
+  padding: 2px 6px;
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+}
+
+.gemma-lead-text {
+  font-size: 13px;
+  color: #f1f5f9;
+  line-height: 1.6;
+  margin: 10px 0 14px 0;
+  font-style: italic;
+  border-left: 2px solid rgba(168, 85, 247, 0.4);
+  padding-left: 10px;
+}
+
+.gemma-breakdown-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.gemma-chip-item {
+  background: rgba(20, 20, 28, 0.8);
+  border: 1px solid var(--border-subtle);
+  padding: 8px 12px;
+}
+
+.gemma-chip-item.strength {
+  border-left: 3px solid var(--accent-green);
+}
+
+.gemma-chip-item.flaw {
+  border-left: 3px solid var(--accent-red);
+}
+
+.chip-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.chip-label.cyan { color: var(--accent-cyan); }
+.chip-label.green { color: var(--accent-green); }
+.chip-label.red { color: var(--accent-red); }
+
+.chip-content {
+  font-size: 11px;
+  color: #cbd5e1;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Spatial Quadrant Distribution Bar */
+.quadrant-bar-container {
+  margin: 8px 0;
+}
+
+.quadrant-bar {
+  display: flex;
+  height: 22px;
+  width: 100%;
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.bar-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: width 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 4px;
+}
+
+.bar-segment.left {
+  background: rgba(0, 229, 255, 0.35);
+  border-right: 1px solid #00e5ff;
+}
+
+.bar-segment.center {
+  background: rgba(0, 255, 102, 0.35);
+  border-right: 1px solid #00ff66;
+}
+
+.bar-segment.right {
+  background: rgba(255, 183, 0, 0.35);
+}
+
+/* Game Over AI Card */
+.game-over-ai-card {
+  background: rgba(16, 12, 28, 0.85);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.2);
+  padding: 14px 18px;
+  max-width: 540px;
+  width: 100%;
+  margin: 12px 0 16px 0;
+  text-align: left;
+}
+
+.ai-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ai-chip {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #c084fc;
+}
+
+.combat-grade-chip {
+  font-size: 10px;
+  font-weight: 800;
+  background: rgba(0, 229, 255, 0.15);
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+.ai-card-lead {
+  font-size: 11px;
+  color: #e2e8f0;
+  line-height: 1.45;
+  margin: 0 0 8px 0;
+}
+
+.ai-card-stats {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.btn-secondary-action.active-glow {
+  border-color: #a855f7;
+  color: #d8b4fe;
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.3);
+}
+
+.btn-secondary-action.active-glow:hover {
+  background: rgba(168, 85, 247, 0.2);
+  color: #fff;
+}
+
+/* =============================================================
    ANIMATIONS
 ============================================================= */
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.8; }
-  50% { opacity: 1; text-shadow: 0 0 10px rgba(255, 42, 75, 0.8); }
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; text-shadow: 0 0 12px rgba(0, 229, 255, 0.8); }
 }
 
 @keyframes pulse-dot {

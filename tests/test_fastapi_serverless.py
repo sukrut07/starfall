@@ -155,6 +155,16 @@ def test_analyze_endpoint(client):
     assert "measurement_description" in mission
     assert len(mission["rationale"]) > 0
 
+    # Gemma analysis assertions
+    assert "gemma_analysis" in data
+    gemma = data["gemma_analysis"]
+    assert "combat_grade" in gemma
+    assert "performance_summary" in gemma
+    assert "tactical_breakdown" in gemma
+    assert "key_strength" in gemma
+    assert "fatal_flaw" in gemma
+    assert "next_mission_directive" in gemma
+
 
 def test_static_assets_serving(client):
     """Verify static assets in public/ are served."""
