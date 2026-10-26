@@ -138,7 +138,7 @@
 
   const state = {
     mode: "START", // START, PLAYING, PAUSED, GAME_OVER
-    controlMode: "keyboard", // keyboard or gesture
+    controlMode: "gesture", // gesture (default) or keyboard
     fps: 60,
     lastTime: performance.now(),
     matchStartTime: 0,
@@ -1585,6 +1585,7 @@
     btn.innerHTML = isMin ? "&#x25A2;" : "&minus;";
   });
 
-  // Initial Health Probe
+  // Initial Health Probe & Set Default Control Mode
   fetchHealthDiagnostics();
+  setControlMode("gesture");
 })();

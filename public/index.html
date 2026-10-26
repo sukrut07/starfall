@@ -83,7 +83,7 @@
             <div class="webcam-pip-view" id="webcamPipView">
               <video id="webcamVideo" autoplay playsinline muted></video>
               <canvas id="webcamCanvas"></canvas>
-              <div class="camera-loading-msg" id="cameraMsg">Click 'HAND GESTURES' to enable camera</div>
+              <div class="camera-loading-msg" id="cameraMsg">Initializing MediaPipe Vision Tracker...</div>
             </div>
             <div class="pip-telemetry">
               <span class="pip-badge lost" id="badge-right-hand">STEER: NONE</span>
@@ -99,15 +99,15 @@
               Choose your control interface to initialize launch sequence.
             </p>
             <div class="mode-switch-group" style="max-width: 380px; width: 100%;">
-              <button class="btn-mode-tab active" id="btn-select-keyboard">&#x2328; KEYBOARD CONTROLS</button>
-              <button class="btn-mode-tab" id="btn-select-gesture">&#x1F590; HAND GESTURES</button>
+              <button class="btn-mode-tab" id="btn-select-keyboard">&#x2328; KEYBOARD CONTROLS</button>
+              <button class="btn-mode-tab active" id="btn-select-gesture">&#x1F590; HAND GESTURES (DEFAULT)</button>
             </div>
             <div class="overlay-actions">
               <button class="btn-primary-action" id="btn-start-game">INITIALIZE FLIGHT</button>
               <button class="btn-secondary-action" id="btn-open-calibration">CALIBRATE CAMERA</button>
             </div>
             <div class="overlay-key-tips">
-              Controls: <kbd>WASD</kbd> or <kbd>&larr;&uarr;&darr;&rarr;</kbd> to Fly &bull; <kbd>Space</kbd> to Fire &bull; <kbd>P</kbd> Pause &bull; <kbd>R</kbd> Restart
+              Controls: Move hand to Fly &bull; Pinch thumb &amp; index finger to Fire &bull; <kbd>Space</kbd> / <kbd>WASD</kbd> also supported
             </div>
           </div>
 
@@ -137,7 +137,7 @@
 
         <div class="playfield-footer">
           <span id="footer-fps">60 FPS</span>
-          <span id="footer-control-mode">CONTROL: KEYBOARD ACTIVE</span>
+          <span id="footer-control-mode">CONTROL: GESTURE ACTIVE</span>
           <span id="footer-wave-status">WAVE 01 IN PROGRESS</span>
         </div>
       </div>
@@ -149,14 +149,14 @@
         <div class="info-card">
           <div class="card-title-bar">
             <span>FLIGHT CONTROLS</span>
-            <span class="version-tag" id="active-ctrl-badge">KEYBOARD</span>
+            <span class="version-tag" id="active-ctrl-badge">GESTURE</span>
           </div>
           <div class="mode-switch-group">
-            <button class="btn-mode-tab active" id="tab-ctrl-keyboard">&#x2328; KEYBOARD</button>
-            <button class="btn-mode-tab" id="tab-ctrl-gesture">&#x1F590; GESTURE</button>
+            <button class="btn-mode-tab" id="tab-ctrl-keyboard">&#x2328; KEYBOARD</button>
+            <button class="btn-mode-tab active" id="tab-ctrl-gesture">&#x1F590; GESTURE</button>
           </div>
           <p class="card-subtext" id="ctrl-hint-text">
-            Standard arcade navigation. Arrow keys or WASD for precise lateral thrusters; Spacebar to fire cannon bursts.
+            Vision steering active. Move hand to steer interceptor; pinch thumb and index finger to fire weapons.
           </p>
           <button class="btn-icon" id="btn-launch-calib-side" style="width: 100%; padding: 6px;">
             TEST WEBCAM &amp; GESTURE TRACKING &UpperRightArrow;
