@@ -64,6 +64,7 @@
           <div class="playfield-controls">
             <button class="btn-icon active" id="btn-toggle-scanlines" title="Toggle CRT scanlines">SCANLINES</button>
             <button class="btn-icon active" id="btn-toggle-audio" title="Toggle sound effects">SFX: ON</button>
+            <button class="btn-icon active" id="btn-toggle-camera" title="Toggle Webcam Picture-in-Picture">CAM: ON</button>
             <button class="btn-icon" id="btn-pause-toggle">PAUSE [P]</button>
           </div>
         </div>
@@ -72,6 +73,23 @@
           <canvas id="gameCanvas" width="800" height="480"></canvas>
           <div class="scanlines" id="scanlinesOverlay"></div>
           <div class="crt-vignette"></div>
+
+          <!-- PERSISTENT WEBCAM PICTURE-IN-PICTURE (KEEPS VIDEO ACTIVE THROUGHOUT GAMEPLAY) -->
+          <div class="webcam-pip-container" id="webcamPipContainer">
+            <div class="webcam-pip-header">
+              <span class="pip-title">&#x1F590; VISION &bull; <span id="pipStatusLabel">READY</span></span>
+              <button class="pip-min-btn" id="btnPipToggle" title="Toggle PIP Preview">&minus;</button>
+            </div>
+            <div class="webcam-pip-view" id="webcamPipView">
+              <video id="webcamVideo" autoplay playsinline muted></video>
+              <canvas id="webcamCanvas"></canvas>
+              <div class="camera-loading-msg" id="cameraMsg">Click 'HAND GESTURES' to enable camera</div>
+            </div>
+            <div class="pip-telemetry">
+              <span class="pip-badge lost" id="badge-right-hand">STEER: NONE</span>
+              <span class="pip-badge lost" id="badge-left-hand">FIRE: NONE</span>
+            </div>
+          </div>
 
           <!-- OVERLAY 1: STARTUP SCREEN -->
           <div class="game-overlay" id="startOverlay">
@@ -220,42 +238,25 @@
         <button class="btn-icon" id="btn-close-calib">&times;</button>
       </div>
 
-      <div class="calibration-grid">
-        <!-- Live Video & Landmark Preview -->
-        <div class="camera-preview-wrapper">
-          <video id="webcamVideo" autoplay playsinline muted></video>
-          <canvas id="webcamCanvas"></canvas>
-          <div class="camera-loading-msg" id="cameraMsg">Click 'START CAMERA' to grant browser webcam permission.</div>
-        </div>
-
-        <!-- Instructions & Status Badges -->
-        <div class="calibration-details">
+        <div class="calibration-details" style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
           <div class="calibration-step">
-            <span class="step-num">[1] RIGHT HAND &bull; FLIGHT STEERING</span>
+            <span class="step-num">[1] FLIGHT STEERING</span>
             <p class="step-desc">
-              Raise your right hand into the camera frame. The palm center smoothly navigates your spaceship across the screen.
+              Move your hand across the webcam field of view. Palm center smoothly pilots the starfighter.
             </p>
-            <div class="hand-status-indicator">
-              <span>Right Hand Position:</span>
-              <span class="status-badge lost" id="badge-right-hand">NOT DETECTED</span>
-            </div>
           </div>
 
           <div class="calibration-step">
-            <span class="step-num">[2] LEFT HAND &bull; PINCH TRIGGER</span>
+            <span class="step-num">[2] PINCH WEAPON TRIGGER</span>
             <p class="step-desc">
-              Pinch your left thumb and index fingertips together to fire laser bursts. Separate them to cease fire.
+              Pinch thumb and index fingertips together to fire laser bursts. Separate fingers to cease fire.
             </p>
-            <div class="hand-status-indicator">
-              <span>Left Hand Pinch:</span>
-              <span class="status-badge lost" id="badge-left-hand">NOT DETECTED</span>
-            </div>
           </div>
 
           <div class="calibration-step">
-            <span class="step-num">[3] SAFE POSITIONING</span>
+            <span class="step-num">[3] HYBRID FAILSAFE</span>
             <p class="step-desc">
-              Ensure both hands are visible in good lighting. If tracking drops, spaceship holds position safely.
+              <kbd>WASD</kbd> / Arrow keys and <kbd>Spacebar</kbd> remain active. Live vision PIP floats in the top-right corner.
             </p>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import time
 from typing import Dict, Optional, Tuple, Any
 import cv2
@@ -101,7 +102,7 @@ class GestureController(BaseController):
                 cmd.target_x = self.last_target_x
                 cmd.target_y = self.last_target_y
 
-        # 2. Left hand pinch firing (with scale normalization & stale protection)
+        # 2. Pinch firing (with scale normalization & stale protection)
         is_firing = self.pinch_detector.update(
             has_left_hand=self.last_result.has_left_hand,
             thumb_tip=self.last_result.left_thumb_tip,
@@ -110,6 +111,19 @@ class GestureController(BaseController):
             hand_scale=self.last_result.left_scale,
             timestamp=self.last_result.timestamp,
         )
+
+        # Allow pinching with right hand as well if 2 hands are detected
+        if not is_firing and len(self.last_result.all_hands) >= 2:
+            r_hand = self.last_result.all_hands[1]
+            r_pts = r_hand.get("landmarks", [])
+            if len(r_pts) > 8:
+                t_tip = r_pts[4]
+                i_tip = r_pts[8]
+                dist = math.hypot(t_tip[0] - i_tip[0], t_tip[1] - i_tip[1])
+                scale = self.last_result.right_scale or 0.2
+                if (dist / scale) <= self.pinch_detector.engage_threshold:
+                    is_firing = True
+
         cmd.fire = is_firing
         self.last_fire_state = is_firing
 

@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import math
 import os
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
@@ -104,29 +106,62 @@ class HandTracker:
                 "landmarks": pts,
             })
 
-            # Calculate anatomical hand scale (distance from wrist [0] to middle MCP [9])
+        # Process role assignment:
+        # If single hand detected: that hand steers AND pinches to fire (supports single-hand play)
+        if len(result.all_hands) == 1:
+            hand = result.all_hands[0]
+            pts = hand["landmarks"]
+            score = hand["score"]
             palm_scale = math.hypot(pts[0][0] - pts[9][0], pts[0][1] - pts[9][1]) if len(pts) > 9 else 0.20
 
-            # Right hand controls spaceship movement
-            if label == "Right":
-                result.has_right_hand = True
-                result.right_confidence = score
-                result.right_scale = palm_scale
-                # Palm center estimated between wrist (0) and middle MCP (9)
-                wrist = pts[0]
-                middle_mcp = pts[9]
-                index_tip = pts[8]
-                # We blend index tip and palm center for intuitive aiming
-                result.right_x = (index_tip[0] * 0.6) + (((wrist[0] + middle_mcp[0]) * 0.5) * 0.4)
-                result.right_y = (index_tip[1] * 0.6) + (((wrist[1] + middle_mcp[1]) * 0.5) * 0.4)
+            wrist = pts[0]
+            middle_mcp = pts[9]
+            index_tip = pts[8]
+            thumb_tip = pts[4]
 
-            # Left hand controls pinch firing
-            elif label == "Left":
-                result.has_left_hand = True
-                result.left_confidence = score
-                result.left_scale = palm_scale
-                result.left_thumb_tip = pts[4]
-                result.left_index_tip = pts[8]
+            # Primary steering
+            result.has_right_hand = True
+            result.right_confidence = score
+            result.right_scale = palm_scale
+            result.right_x = (index_tip[0] * 0.6) + (((wrist[0] + middle_mcp[0]) * 0.5) * 0.4)
+            result.right_y = (index_tip[1] * 0.6) + (((wrist[1] + middle_mcp[1]) * 0.5) * 0.4)
+
+            # Single-hand pinch firing
+            result.has_left_hand = True
+            result.left_confidence = score
+            result.left_scale = palm_scale
+            result.left_thumb_tip = thumb_tip
+            result.left_index_tip = index_tip
+
+        elif len(result.all_hands) >= 2:
+            # Dual hand mode: sort by mirrored x (horizontal screen position)
+            # Higher x in mirrored frame = User's Right Hand (Steering)
+            # Lower x in mirrored frame = User's Left Hand (Pinch Trigger)
+            sorted_by_x = sorted(result.all_hands, key=lambda h: h["landmarks"][0][0])
+            left_hand = sorted_by_x[0]   # Lower mirrored X (screen left)
+            right_hand = sorted_by_x[1]  # Higher mirrored X (screen right)
+
+            # Right hand (steering)
+            r_pts = right_hand["landmarks"]
+            r_scale = math.hypot(r_pts[0][0] - r_pts[9][0], r_pts[0][1] - r_pts[9][1]) if len(r_pts) > 9 else 0.20
+            r_wrist = r_pts[0]
+            r_mid = r_pts[9]
+            r_idx = r_pts[8]
+
+            result.has_right_hand = True
+            result.right_confidence = right_hand["score"]
+            result.right_scale = r_scale
+            result.right_x = (r_idx[0] * 0.6) + (((r_wrist[0] + r_mid[0]) * 0.5) * 0.4)
+            result.right_y = (r_idx[1] * 0.6) + (((r_wrist[1] + r_mid[1]) * 0.5) * 0.4)
+
+            # Left hand (weapon trigger)
+            l_pts = left_hand["landmarks"]
+            l_scale = math.hypot(l_pts[0][0] - l_pts[9][0], l_pts[0][1] - l_pts[9][1]) if len(l_pts) > 9 else 0.20
+            result.has_left_hand = True
+            result.left_confidence = left_hand["score"]
+            result.left_scale = l_scale
+            result.left_thumb_tip = l_pts[4]
+            result.left_index_tip = l_pts[8]
 
         result.timestamp = time.time()
         return result

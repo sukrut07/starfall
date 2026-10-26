@@ -114,3 +114,16 @@ def test_pinch_detector_stale_frame_expiry():
     assert res2 is False
     assert detector.is_pinching is False
 
+
+def test_hand_tracker_process_frame_empty():
+    from vision.hand_tracker import HandTracker, HandTrackingResult
+    import numpy as np
+
+    tracker = HandTracker()
+    empty_frame = np.zeros((480, 640, 3), dtype=np.uint8)
+    res = tracker.process_frame(empty_frame)
+    assert isinstance(res, HandTrackingResult)
+    assert res.has_right_hand is False
+    assert res.has_left_hand is False
+
+
