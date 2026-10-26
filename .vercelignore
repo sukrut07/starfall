@@ -6,12 +6,13 @@
 __pycache__/
 .env
 .agents/
-.agent/
 graphify-out/
 requirements-desktop.txt
 starfall.db
-hand_landmarker.task
 tests/
+assets/models/hand_landmarker.task
+!public/models/hand_landmarker.task
+!public/hand_landmarker.task
 ui/
 vision/
 renderers/
