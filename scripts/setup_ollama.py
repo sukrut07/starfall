@@ -93,7 +93,7 @@ def setup_and_diagnose() -> None:
     else:
         console.print(f"\n[bold yellow]⚠[/bold yellow] Model [bold cyan]{target_model}[/bold cyan] is not yet downloaded.")
         console.print(Panel(
-            f"[bold]To download Gemma 4 (approx 7.5GB), run this command in your terminal:[/bold]\n\n"
+            f"[bold]To download the configured Gemma 4 model, run this command in your terminal:[/bold]\n\n"
             f"   [bold green]ollama pull {target_model}[/bold green]\n\n"
             f"[dim]Alternative lightweight model: ollama pull gemma4:e2b\n"
             f"Or for higher reasoning capacity: ollama pull gemma4:e4b[/dim]",
