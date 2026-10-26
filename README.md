@@ -8,11 +8,12 @@
 
 **STARFALL** is an adaptive arcade space shooter built from the ground up around a core design principle: **the enemy fleet does not simply follow fixed difficulty curves — it observes player telemetry, identifies weaknesses, and counter-attacks with strategic intent.**
 
-### Three Ways to Play
+### Four Ways to Play & Interact
 
 1. **Terminal Mode (ASCII Arcade)**: A real-time, non-blocking ASCII game loop rendered in your terminal with zero flicker, complete with HUD, particle stars, and live AI Commander briefing.
 2. **Pygame Mode (Graphical Arcade)**: A vertical-scrolling space shooter running at 60 FPS featuring glowing laser fire, particle explosions, animated formation sweeps, telegraphed laser lanes, and an AI Commander dashboard.
 3. **Computer Vision Gesture Mode**: Control spaceship positioning with your **right hand** and trigger firing by **pinching your left thumb and index finger** together, with an in-game picture-in-picture webcam feed and hand landmark telemetry.
+4. **Textmode Web Companion Display**: Interactive tactical console and glyph converter inspired by [extension.textmode.art](https://extension.textmode.art/). Live simulation rendered in density-configurable ASCII glyphs (8px–64px), real-time tactical feed, flight debriefs, and Gemma 4 model inspector.
 
 ### Core Philosophy
 
@@ -252,25 +253,65 @@ At the end of every match, the post-game analyst compiles:
 
 ## 10. Automated Testing
 
-Run the test suite with `pytest`:
+Run the full verified test suite with `pytest`:
 
 ```bash
-pytest
+pytest -v
 ```
 
-### Verified Test Suite (25 Tests Passing):
+### Verified Test Suite (32 Tests Passing):
 - `tests/test_collisions.py`: Circle hitboxes, laser lanes, and non-duplicate dodge detection.
 - `tests/test_scoring.py`: Kill rewards, high-score tracking, and zero-shot division safety.
-- `tests/test_gestures.py`: Pinch hysteresis, debounce frames, deadzones, and hand lost behavior.
+- `tests/test_gestures.py`: Pinch hysteresis, debounce frames, deadzones, scale normalization, stale frame expiry, and hand lost behavior.
 - `tests/test_metrics.py`: Accurate zone ratios, camping ratios, and profile classifiers.
 - `tests/test_strategy_validation.py`: Schema enforcement, unknown formation rejection, and bounds clamping.
 - `tests/test_fallback.py`: Deterministic fallback scaling and bias counters without LLM.
 - `tests/test_game_modes.py`: Headless simulation lifecycle, boundary clamping, and wave boundary plan queuing.
 - `tests/test_smoke.py`: End-to-end 50-frame gameplay loop with SQLite persistence.
+- `tests/test_web_server.py`: Textmode web companion server, `/api/status`, `/api/matches`, and static asset serving.
 
 ---
 
-## 11. Project Directory Structure
+## 11. Command-Line Reference
+
+```bash
+# Launch interactive terminal mission dispatch menu
+python main.py
+
+# Play in Terminal mode with keyboard
+python main.py play --renderer terminal --control keyboard
+
+# Play in Pygame mode with keyboard
+python main.py play --renderer pygame --control keyboard
+
+# Play in Pygame mode with MediaPipe hand tracking & gestures
+python main.py play --renderer pygame --control gesture
+
+# Play in Terminal mode with MediaPipe hand tracking & gestures
+python main.py play --renderer terminal --control gesture
+
+# Launch Textmode Web Companion Display (inspired by extension.textmode.art)
+python main.py web --port 8000
+
+# Run webcam & gesture tracking diagnostics without full game launch
+python main.py vision-test
+
+# Run local Ollama & Gemma 4 connectivity test and sample structured inference
+python main.py model-check
+
+# View SQLite match history
+python main.py history
+
+# View most recent post-game flight debrief
+python main.py analyze-last
+
+# Run full environment auditor
+python main.py env-check
+```
+
+---
+
+## 12. Project Directory Structure
 
 ```
 starfall/
@@ -278,14 +319,19 @@ starfall/
 ├── requirements.txt            # Python dependencies
 ├── pyproject.toml              # Build & test configurations
 ├── README.md                   # Complete architectural documentation
-├── .env.example                # Sample environment variables
+├── .env.example                # Sample environment variables (GEMMA_API_KEY, OLLAMA_MODEL)
 ├── config/
 │   ├── settings.yaml           # Centralized configuration settings
-│   ├── loader.py               # Pydantic configuration loader
+│   ├── loader.py               # Pydantic configuration loader with python-dotenv
 │   └── calibration.json        # Saved gesture calibration offsets
 ├── assets/
 │   └── models/
 │       └── hand_landmarker.task # MediaPipe Hand Landmarker model
+├── web/                        # Textmode Web Companion Display (inspired by textmode.art)
+│   ├── index.html              # Wireframe HUD, density bar, tabs & debrief
+│   ├── style.css               # Near-black textmode aesthetic & responsive layout
+│   ├── app.js                  # Canvas ASCII glyph simulation & REST integration
+│   └── server.py               # Native ThreadingHTTPServer with REST API endpoints
 ├── game/
 │   ├── engine.py               # Authoritative simulation engine
 │   ├── entities.py             # Player, Enemy, Projectile, Obstacle, Powerup
@@ -299,11 +345,11 @@ starfall/
 ├── controls/
 │   ├── base.py                 # BaseController interface
 │   ├── keyboard.py             # Terminal & Pygame keyboard controllers
-│   ├── gesture.py              # Two-hand gesture controller
+│   ├── gesture.py              # Two-hand gesture controller (right: move, left: pinch)
 │   └── calibration.py          # Calibration persistence
 ├── vision/
 │   ├── camera.py               # Thread-safe OpenCV capture
-│   ├── hand_tracker.py         # MediaPipe landmarker processor
+│   ├── hand_tracker.py         # MediaPipe landmarker processor with palm scale
 │   ├── pinch_detector.py       # Dual-threshold hysteresis pinch detector
 │   └── gesture_mapper.py       # EMA smoothing & screen coordinate mapping
 ├── analytics/
@@ -331,13 +377,14 @@ starfall/
 │   ├── check_environment.py    # Subsystem environment auditor
 │   ├── setup_ollama.py         # Model diagnostic wizard
 │   └── test_camera.py          # Visual gesture diagnostic window
-└── tests/                      # Pytest automated test suite (25 tests)
+└── tests/                      # Pytest automated test suite (32 tests passing)
 ```
 
 ---
 
-## 12. License
+## 13. License
 
 - **Source Code**: MIT License.
 - **MediaPipe Hand Landmarker**: Apache 2.0.
 - **Gemma 4 Models**: Governed by Google's [Gemma Terms of Use](https://ai.google.dev/gemma/terms).
+
