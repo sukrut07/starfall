@@ -6,6 +6,11 @@ import os
 from pathlib import Path
 from typing import List, Optional
 import yaml
+
+try:
+    from dotenv import load_dotenv
+except ImportError:  # Supports reduced installs while dependencies are being repaired.
+    load_dotenv = None
 from pydantic import BaseModel, Field
 
 
@@ -107,7 +112,12 @@ class Settings(BaseModel):
 
 
 def load_settings(config_path: Optional[str] = None) -> Settings:
-    """Load settings from YAML file with environment variable overrides."""
+    """Load YAML defaults, then .env values, then explicit OS environment overrides."""
+    # Existing shell/OS variables win over .env values. This makes local configuration
+    # convenient without ever requiring a cloud API key for Ollama.
+    if load_dotenv is not None:
+        load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env", override=False)
+
     data = {}
     if config_path is None:
         default_yaml = Path(__file__).parent / "settings.yaml"
