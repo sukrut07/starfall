@@ -235,8 +235,8 @@
   ];
 
   const gestureController = {
-    videoEl: document.getElementById("webcamVideo"),
-    canvasEl: document.getElementById("webcamCanvas"),
+    videoEl: null,
+    canvasEl: null,
     landmarker: null,
     stream: null,
     isInitialized: false,
@@ -250,21 +250,26 @@
       smoothX: 400,
       smoothY: 420,
       lastSeen: 0,
-      alpha: 0.32, // Responsive EMA filter
-      deadzone: 4.0,
+      alpha: 0.35, // Responsive EMA filter
+      deadzone: 2.0,
+      isPinching: false,
+      pinchDistance: 1.0,
     },
     leftHand: {
       detected: false,
       isPinching: false,
       pinchDistance: 1.0,
-      engageThreshold: 0.32, // Normalized pinch distance
-      releaseThreshold: 0.45,
+      engageThreshold: 0.35, // Normalized pinch distance
+      releaseThreshold: 0.48,
       lastSeen: 0,
     },
 
     async init() {
       if (this.isInitialized && this.landmarker) return true;
+      if (!this.videoEl) this.videoEl = document.getElementById("webcamVideo");
+      if (!this.canvasEl) this.canvasEl = document.getElementById("webcamCanvas");
       const cameraMsg = document.getElementById("cameraMsg");
+      const pipStatus = document.getElementById("pipStatusLabel");
 
       try {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -275,15 +280,19 @@
           cameraMsg.style.display = "flex";
           cameraMsg.textContent = "Requesting webcam access...";
         }
+        if (pipStatus) pipStatus.textContent = "REQUESTING ACCESS";
 
         this.stream = await navigator.mediaDevices.getUserMedia({
           video: { width: 640, height: 480, facingMode: "user" },
           audio: false,
         });
-        this.videoEl.srcObject = this.stream;
-        await this.videoEl.play();
+        if (this.videoEl) {
+          this.videoEl.srcObject = this.stream;
+          await this.videoEl.play();
+        }
 
         if (cameraMsg) cameraMsg.textContent = "Loading MediaPipe hand vision model...";
+        if (pipStatus) pipStatus.textContent = "LOADING MODEL";
 
         // Ensure FilesetResolver and HandLandmarker are available via dynamic import if needed
         if (!window.FilesetResolver || !window.HandLandmarker) {
@@ -311,7 +320,7 @@
           "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
         );
 
-        // Chain model URLs: local fast route first, Google Cloud Storage fallback
+        // Chain candidate models (local high-speed static asset first, Google Storage fallback)
         const candidateModels = [
           "/models/hand_landmarker.task",
           "/hand_landmarker.task",
@@ -321,6 +330,14 @@
         let createdLandmarker = null;
         for (const modelPath of candidateModels) {
           try {
+            // Check accessibility of local model to avoid 404 HTML flatbuffer abort
+            if (modelPath.startsWith("/")) {
+              const headCheck = await fetch(modelPath, { method: "HEAD" });
+              if (!headCheck.ok) continue;
+              const ct = headCheck.headers.get("content-type") || "";
+              if (ct.includes("text/html")) continue;
+            }
+
             // Attempt GPU acceleration first
             createdLandmarker = await window.HandLandmarker.createFromOptions(vision, {
               baseOptions: {
@@ -358,14 +375,26 @@
         this.isRunning = true;
 
         if (cameraMsg) cameraMsg.style.display = "none";
+        if (pipStatus) pipStatus.textContent = "LIVE";
+
+        // Keep PIP visible
+        const pipContainer = document.getElementById("webcamPipContainer");
+        if (pipContainer) pipContainer.classList.remove("pip-hidden");
+        const camBtn = document.getElementById("btn-toggle-camera");
+        if (camBtn) {
+          camBtn.classList.add("active");
+          camBtn.textContent = "CAM: ON";
+        }
+
         this._startLoop();
         return true;
       } catch (err) {
         console.warn("MediaPipe gesture initialization error:", err);
         if (cameraMsg) {
-          cameraMsg.textContent = `Camera error: ${err.message}. Keyboard controls remain active.`;
-          cameraMsg.style.color = "var(--accent-red)";
+          cameraMsg.textContent = `Camera note: ${err.message}. Keyboard controls active!`;
+          cameraMsg.style.color = "var(--accent-yellow)";
         }
+        if (pipStatus) pipStatus.textContent = "OFFLINE";
         return false;
       }
     },
@@ -402,23 +431,20 @@
       // Draw skeleton on preview canvas
       if (this.canvasEl && this.videoEl) {
         const cCtx = this.canvasEl.getContext("2d");
-        const w = (this.canvasEl.width = this.videoEl.videoWidth || 640);
-        const h = (this.canvasEl.height = this.videoEl.videoHeight || 480);
+        const w = (this.canvasEl.width = this.videoEl.videoWidth || 200);
+        const h = (this.canvasEl.height = this.videoEl.videoHeight || 150);
         cCtx.clearRect(0, 0, w, h);
 
         if (results && results.landmarks && results.landmarks.length > 0) {
           for (let hIdx = 0; hIdx < results.landmarks.length; hIdx++) {
             const lms = results.landmarks[hIdx];
-            const isLeftPinchHand =
-              results.landmarks.length === 2
-                ? lms[0].x > (results.landmarks[1 - hIdx] ? results.landmarks[1 - hIdx][0].x : 0.5)
-                : lms[0].x > 0.5;
+            const isLeftHand = results.landmarks.length === 2 ? (lms[0].x > results.landmarks[1 - hIdx][0].x) : false;
 
             // Draw bone connections
-            cCtx.lineWidth = 3;
-            cCtx.strokeStyle = isLeftPinchHand
+            cCtx.lineWidth = 2.5;
+            cCtx.strokeStyle = isLeftHand
               ? (this.leftHand.isPinching ? "#ff2a5f" : "#00f0ff")
-              : "#00ff66";
+              : (this.rightHand.isPinching ? "#ff2a5f" : "#00ff66");
 
             for (const [s, e] of HAND_CONNECTIONS) {
               const p1 = lms[s];
@@ -435,17 +461,19 @@
             for (let j = 0; j < lms.length; j++) {
               const pt = lms[j];
               cCtx.beginPath();
-              const isPinchTip = isLeftPinchHand && (j === 4 || j === 8);
-              cCtx.arc(pt.x * w, pt.y * h, isPinchTip ? 7 : 4, 0, 2 * Math.PI);
-              cCtx.fillStyle = isPinchTip && this.leftHand.isPinching ? "#ff2a5f" : "#ffffff";
+              const isPinchTip = j === 4 || j === 8;
+              cCtx.arc(pt.x * w, pt.y * h, isPinchTip ? 5 : 3, 0, 2 * Math.PI);
+              const isPinching = isLeftHand ? this.leftHand.isPinching : this.rightHand.isPinching;
+              cCtx.fillStyle = isPinchTip && isPinching ? "#ff2a5f" : "#ffffff";
               cCtx.fill();
             }
 
-            // If pinching, draw highlighted red line between thumb and index tip
-            if (isLeftPinchHand && this.leftHand.isPinching) {
-              const tTip = lms[4];
-              const iTip = lms[8];
-              cCtx.lineWidth = 5;
+            // Highlight pinch segment
+            const tTip = lms[4];
+            const iTip = lms[8];
+            const isPinching = isLeftHand ? this.leftHand.isPinching : this.rightHand.isPinching;
+            if (isPinching && tTip && iTip) {
+              cCtx.lineWidth = 4;
               cCtx.strokeStyle = "#ff0044";
               cCtx.beginPath();
               cCtx.moveTo(tTip.x * w, tTip.y * h);
@@ -457,117 +485,161 @@
       }
 
       if (results && results.landmarks && results.landmarks.length > 0) {
-        // Sort hands by x position in raw unmirrored camera coordinates:
-        // Lower x = User's Right Hand (Steering Interceptor)
-        // Higher x = User's Left Hand (Pinch Laser Trigger)
-        const indexedHands = results.landmarks.map((lms, idx) => ({
+        // Collect hands with palm center coordinates
+        const detectedHands = results.landmarks.map((lms, idx) => ({
           lms,
           idx,
           palmX: (lms[0].x + lms[5].x + lms[17].x) / 3.0,
           palmY: (lms[0].y + lms[5].y + lms[17].y) / 3.0,
-          handedness:
-            results.handednesses && results.handednesses[idx] && results.handednesses[idx][0]
-              ? results.handednesses[idx][0].categoryName
-              : "",
         }));
 
-        indexedHands.sort((a, b) => a.palmX - b.palmX);
-
-        for (let i = 0; i < indexedHands.length; i++) {
-          const item = indexedHands[i];
+        if (detectedHands.length === 1) {
+          // SINGLE HAND MODE:
+          // The single visible hand ALWAYS steers the interceptor AND pinches to fire
+          const item = detectedHands[0];
           const lms = item.lms;
 
-          // Determine role:
-          // In dual-hand mode: first (lowest x) is Right Hand, second is Left Hand.
-          // In single-hand mode: if palmX < 0.5 -> Right Hand (steering); else Left Hand.
-          const isRightSteering =
-            indexedHands.length === 2
-              ? i === 0
-              : item.handedness === "Left" || item.palmX < 0.55;
+          foundRight = true;
+          this.rightHand.lastSeen = now;
+          this.rightHand.detected = true;
 
-          if (isRightSteering && !foundRight) {
-            // RIGHT HAND -> Spaceship Flight Steering
-            foundRight = true;
-            this.rightHand.lastSeen = now;
-            this.rightHand.detected = true;
+          // Comfortable mirrored coordinate mapping [0.15, 0.85] -> [30, 770]
+          const mirroredX = 1.0 - item.palmX;
+          const normX = Math.max(0, Math.min(1, (mirroredX - 0.15) / 0.70));
+          const targetCanvasX = 30 + normX * 740;
 
-            // Mirror coordinate mapping to game canvas: palmX -> targetCanvasX
-            const targetCanvasX = (1.0 - item.palmX) * 800;
-            const targetCanvasY = Math.max(80, Math.min(460, item.palmY * 480));
+          const normY = Math.max(0, Math.min(1, (item.palmY - 0.15) / 0.65));
+          const targetCanvasY = 80 + normY * 370;
 
-            const dx = targetCanvasX - this.rightHand.smoothX;
-            const dy = targetCanvasY - this.rightHand.smoothY;
+          const dx = targetCanvasX - this.rightHand.smoothX;
+          const dy = targetCanvasY - this.rightHand.smoothY;
 
-            if (Math.hypot(dx, dy) > this.rightHand.deadzone) {
-              this.rightHand.smoothX += dx * this.rightHand.alpha;
-              this.rightHand.smoothY += dy * this.rightHand.alpha;
+          if (Math.hypot(dx, dy) > this.rightHand.deadzone) {
+            this.rightHand.smoothX += dx * this.rightHand.alpha;
+            this.rightHand.smoothY += dy * this.rightHand.alpha;
+          }
+
+          // Single-hand pinch measurement
+          const tTip = lms[4];
+          const iTip = lms[8];
+          const rawPinch = Math.hypot(tTip.x - iTip.x, tTip.y - iTip.y);
+          const handScale = Math.hypot(lms[0].x - lms[9].x, lms[0].y - lms[9].y) || 0.2;
+          const normPinch = rawPinch / handScale;
+          this.rightHand.pinchDistance = normPinch;
+
+          if (!this.rightHand.isPinching && normPinch <= this.leftHand.engageThreshold) {
+            this.rightHand.isPinching = true;
+          } else if (this.rightHand.isPinching && normPinch >= this.leftHand.releaseThreshold) {
+            this.rightHand.isPinching = false;
+          }
+
+          if (badgeRight) {
+            badgeRight.className = "pip-badge tracked";
+            badgeRight.textContent = `STEER [${Math.round(this.rightHand.smoothX)}]`;
+          }
+          if (badgeLeft) {
+            if (this.rightHand.isPinching) {
+              badgeLeft.className = "pip-badge pinching";
+              badgeLeft.textContent = "PINCH [FIRE!]";
+            } else {
+              badgeLeft.className = "pip-badge tracked";
+              badgeLeft.textContent = `PINCH READY`;
             }
+          }
+        } else {
+          // DUAL HAND MODE:
+          // Sort by raw camera x:
+          // Lower x = User's Right Hand (Steering)
+          // Higher x = User's Left Hand (Trigger)
+          detectedHands.sort((a, b) => a.palmX - b.palmX);
 
-            // Compute pinch distance on right hand for flexible single-hand play
-            const tTipR = lms[4];
-            const iTipR = lms[8];
-            const rawPinchR = Math.hypot(tTipR.x - iTipR.x, tTipR.y - iTipR.y);
-            const handScaleR = Math.hypot(lms[0].x - lms[9].x, lms[0].y - lms[9].y) || 0.2;
-            const normPinchR = rawPinchR / handScaleR;
-            this.rightHand.pinchDistance = normPinchR;
-            if (!this.rightHand.isPinching && normPinchR <= this.leftHand.engageThreshold) {
-              this.rightHand.isPinching = true;
-            } else if (this.rightHand.isPinching && normPinchR >= this.leftHand.releaseThreshold) {
-              this.rightHand.isPinching = false;
-            }
+          // Right Hand (Steering)
+          const rItem = detectedHands[0];
+          const rLms = rItem.lms;
+          foundRight = true;
+          this.rightHand.lastSeen = now;
+          this.rightHand.detected = true;
 
-            if (badgeRight) {
-              badgeRight.className = "status-badge tracked";
-              badgeRight.textContent = `TRACKED (${Math.round(this.rightHand.smoothX)}, ${Math.round(this.rightHand.smoothY)})`;
-            }
-          } else {
-            // LEFT HAND -> Pinch Weapon Trigger
-            foundLeft = true;
-            this.leftHand.lastSeen = now;
-            this.leftHand.detected = true;
+          const rMirroredX = 1.0 - rItem.palmX;
+          const rNormX = Math.max(0, Math.min(1, (rMirroredX - 0.15) / 0.70));
+          const rTargetX = 30 + rNormX * 740;
 
-            const tTip = lms[4];
-            const iTip = lms[8];
-            const rawPinch = Math.hypot(tTip.x - iTip.x, tTip.y - iTip.y);
+          const rNormY = Math.max(0, Math.min(1, (rItem.palmY - 0.15) / 0.65));
+          const rTargetY = 80 + rNormY * 370;
 
-            const handScale = Math.hypot(lms[0].x - lms[9].x, lms[0].y - lms[9].y) || 0.2;
-            const normPinch = rawPinch / handScale;
-            this.leftHand.pinchDistance = normPinch;
+          const rDx = rTargetX - this.rightHand.smoothX;
+          const rDy = rTargetY - this.rightHand.smoothY;
 
-            if (!this.leftHand.isPinching && normPinch <= this.leftHand.engageThreshold) {
-              this.leftHand.isPinching = true;
-            } else if (this.leftHand.isPinching && normPinch >= this.leftHand.releaseThreshold) {
-              this.leftHand.isPinching = false;
-            }
+          if (Math.hypot(rDx, rDy) > this.rightHand.deadzone) {
+            this.rightHand.smoothX += rDx * this.rightHand.alpha;
+            this.rightHand.smoothY += rDy * this.rightHand.alpha;
+          }
 
-            if (badgeLeft) {
-              if (this.leftHand.isPinching) {
-                badgeLeft.className = "status-badge pinching";
-                badgeLeft.textContent = `PINCHING [FIRING] (${normPinch.toFixed(2)})`;
-              } else {
-                badgeLeft.className = "status-badge tracked";
-                badgeLeft.textContent = `OPEN [READY] (${normPinch.toFixed(2)})`;
-              }
+          // Measure pinch on right hand too
+          const rTTip = rLms[4];
+          const rITip = rLms[8];
+          const rRawPinch = Math.hypot(rTTip.x - rITip.x, rTTip.y - rITip.y);
+          const rHandScale = Math.hypot(rLms[0].x - rLms[9].x, rLms[0].y - rLms[9].y) || 0.2;
+          const rNormPinch = rRawPinch / rHandScale;
+          this.rightHand.pinchDistance = rNormPinch;
+          if (!this.rightHand.isPinching && rNormPinch <= this.leftHand.engageThreshold) {
+            this.rightHand.isPinching = true;
+          } else if (this.rightHand.isPinching && rNormPinch >= this.leftHand.releaseThreshold) {
+            this.rightHand.isPinching = false;
+          }
+
+          if (badgeRight) {
+            badgeRight.className = "pip-badge tracked";
+            badgeRight.textContent = `STEER [${Math.round(this.rightHand.smoothX)}]`;
+          }
+
+          // Left Hand (Trigger)
+          const lItem = detectedHands[1];
+          const lLms = lItem.lms;
+          foundLeft = true;
+          this.leftHand.lastSeen = now;
+          this.leftHand.detected = true;
+
+          const lTTip = lLms[4];
+          const lITip = lLms[8];
+          const lRawPinch = Math.hypot(lTTip.x - lITip.x, lTTip.y - lITip.y);
+          const lHandScale = Math.hypot(lLms[0].x - lLms[9].x, lLms[0].y - lLms[9].y) || 0.2;
+          const lNormPinch = lRawPinch / lHandScale;
+          this.leftHand.pinchDistance = lNormPinch;
+
+          if (!this.leftHand.isPinching && lNormPinch <= this.leftHand.engageThreshold) {
+            this.leftHand.isPinching = true;
+          } else if (this.leftHand.isPinching && lNormPinch >= this.leftHand.releaseThreshold) {
+            this.leftHand.isPinching = false;
+          }
+
+          if (badgeLeft) {
+            if (this.leftHand.isPinching || this.rightHand.isPinching) {
+              badgeLeft.className = "pip-badge pinching";
+              badgeLeft.textContent = "PINCH [FIRE!]";
+            } else {
+              badgeLeft.className = "pip-badge tracked";
+              badgeLeft.textContent = `PINCH READY`;
             }
           }
         }
       }
 
-      // Stale frame timeout (350ms)
+      // Stale frame expiry (350ms)
       if (!foundRight && now - this.rightHand.lastSeen > 350) {
         this.rightHand.detected = false;
         if (badgeRight) {
-          badgeRight.className = "status-badge lost";
-          badgeRight.textContent = "NOT DETECTED";
+          badgeRight.className = "pip-badge lost";
+          badgeRight.textContent = "STEER: NONE";
         }
       }
 
       if (!foundLeft && now - this.leftHand.lastSeen > 350) {
         this.leftHand.detected = false;
         this.leftHand.isPinching = false;
-        if (badgeLeft) {
-          badgeLeft.className = "status-badge lost";
-          badgeLeft.textContent = "NOT DETECTED";
+        if (badgeLeft && !this.rightHand.detected) {
+          badgeLeft.className = "pip-badge lost";
+          badgeLeft.textContent = "FIRE: NONE";
         }
       }
     },
@@ -934,27 +1006,30 @@
       }
     }
 
-    // 1. Process Input into Player Motion
+    // 1. Process Input into Player Motion (Hybrid Gesture + Keyboard Support)
     let moveX = 0;
     let moveY = 0;
 
-    if (state.controlMode === "gesture" && gestureController.rightHand.detected) {
-      // Gesture movement (smoothed coordinates)
+    const isGestureActive = gestureController.rightHand.detected;
+    if (isGestureActive) {
+      // Gesture movement (responsive smoothed coordinates)
       const targetX = gestureController.rightHand.smoothX;
       const targetY = gestureController.rightHand.smoothY;
-      player.x += (targetX - player.x) * 0.22;
-      player.y += (targetY - player.y) * 0.22;
-    } else {
-      // Keyboard movement
-      if (keys.left) moveX -= 1;
-      if (keys.right) moveX += 1;
-      if (keys.up) moveY -= 1;
-      if (keys.down) moveY += 1;
+      player.x += (targetX - player.x) * 0.28;
+      player.y += (targetY - player.y) * 0.28;
+    }
 
-      if (moveX === 0 && moveY === 0) {
-        state.telemetry.stationaryTicks++;
-      }
+    // Keyboard movement (always available as active control or failsafe fine-tuning)
+    if (keys.left) moveX -= 1;
+    if (keys.right) moveX += 1;
+    if (keys.up) moveY -= 1;
+    if (keys.down) moveY += 1;
 
+    if (!isGestureActive && moveX === 0 && moveY === 0) {
+      state.telemetry.stationaryTicks++;
+    }
+
+    if (moveX !== 0 || moveY !== 0) {
       player.x += moveX * player.speed * dt;
       player.y += moveY * player.speed * dt;
     }
@@ -963,12 +1038,11 @@
     player.x = Math.max(20, Math.min(780, player.x));
     player.y = Math.max(100, Math.min(460, player.y));
 
-    // Player Weapon Firing
+    // Player Weapon Firing: Spacebar/Keyboard OR pinch from either tracked hand
     const isFiring =
       keys.fire ||
-      (state.controlMode === "gesture" &&
-        ((gestureController.leftHand.detected && gestureController.leftHand.isPinching) ||
-         (!gestureController.leftHand.detected && gestureController.rightHand.detected && gestureController.rightHand.isPinching)));
+      (gestureController.leftHand.detected && gestureController.leftHand.isPinching) ||
+      (gestureController.rightHand.detected && gestureController.rightHand.isPinching);
 
     const now = performance.now();
     if (isFiring && now - player.lastShotTime >= player.shotCooldownMs) {
@@ -1304,6 +1378,26 @@
       ctx.fillStyle = ft.color;
       ctx.fillText(ft.text, ft.x, ft.y);
     }
+
+    // 9. Draw Live In-Game Vision Tracking HUD Indicator
+    if (gestureController.isRunning) {
+      ctx.save();
+      ctx.font = "11px 'JetBrains Mono', monospace";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "bottom";
+      if (gestureController.rightHand.detected) {
+        ctx.fillStyle = "#00ff66";
+        ctx.fillText("[VISION: STEERING ACTIVE]", 16, 470);
+        if (gestureController.leftHand.isPinching || gestureController.rightHand.isPinching) {
+          ctx.fillStyle = "#ff2a4b";
+          ctx.fillText("[PINCH: FIRING!]", 200, 470);
+        }
+      } else {
+        ctx.fillStyle = "rgba(0, 229, 255, 0.6)";
+        ctx.fillText("[VISION: ACTIVE - SHOW HAND TO STEER]", 16, 470);
+      }
+      ctx.restore();
+    }
   }
 
   // ==========================================================================
@@ -1362,6 +1456,10 @@
     document.getElementById("pauseOverlay").classList.add("hidden");
     document.getElementById("gameOverOverlay").classList.add("hidden");
     document.getElementById("debriefModal").classList.add("hidden");
+
+    if (state.controlMode === "gesture" && !gestureController.isInitialized) {
+      gestureController.init();
+    }
 
     resetGame();
     state.mode = "PLAYING";
@@ -1464,6 +1562,27 @@
     sfx.enabled = !sfx.enabled;
     e.target.classList.toggle("active", sfx.enabled);
     e.target.textContent = sfx.enabled ? "SFX: ON" : "SFX: OFF";
+  });
+
+  // Camera PIP Toggle Button in Playfield Header
+  document.getElementById("btn-toggle-camera")?.addEventListener("click", (e) => {
+    const pip = document.getElementById("webcamPipContainer");
+    if (!pip) return;
+    const isHidden = pip.classList.toggle("pip-hidden");
+    e.target.classList.toggle("active", !isHidden);
+    e.target.textContent = isHidden ? "CAM: OFF" : "CAM: ON";
+    if (!isHidden && !gestureController.isInitialized) {
+      gestureController.init();
+    }
+  });
+
+  // Minimize / Expand PIP Button
+  document.getElementById("btnPipToggle")?.addEventListener("click", () => {
+    const pip = document.getElementById("webcamPipContainer");
+    const btn = document.getElementById("btnPipToggle");
+    if (!pip || !btn) return;
+    const isMin = pip.classList.toggle("minimized");
+    btn.innerHTML = isMin ? "&#x25A2;" : "&minus;";
   });
 
   // Initial Health Probe

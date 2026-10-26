@@ -1,6 +1,8 @@
 # STARFALL Deployment & Web Architecture Guide
 
-This document describes how to deploy the STARFALL arcade shooter to Vercel with its FastAPI backend and browser-playable MediaPipe gesture frontend, while maintaining local desktop execution with Pygame and local Gemma 4 / Ollama models.
+> **Production FastAPI Serverless & Browser-Playable Arcade Shooter on Vercel**
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsukrutdusane%2Fstarfall)
 
 ---
 

@@ -2,6 +2,11 @@
 
 > **A real-time Galaga-inspired space shooter powered by local Gemma 4 reasoning, LangGraph tactical orchestration, and computer vision hand tracking.**
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsukrutdusane%2Fstarfall)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg)](https://fastapi.tiangolo.com/)
+
 ---
 
 ## 1. Project Overview
@@ -395,7 +400,10 @@ starfall/
 
 STARFALL includes a browser-playable web deployment running on **FastAPI** and **Vercel Serverless Functions**:
 
-- **Frontend (`public/`)**: Browser-playable HTML5 Canvas arcade shooter rendered with textmode aesthetics. Uses browser-side **MediaPipe Tasks Vision** for two-hand webcam flight and pinch firing controls, plus keyboard fallback.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsukrutdusane%2Fstarfall)
+
+- **One-Click Deploy**: Click the badge above to clone and deploy STARFALL directly to your Vercel account.
+- **Frontend (`public/`)**: Browser-playable HTML5 Canvas arcade shooter rendered with textmode aesthetics. Uses browser-side **MediaPipe Tasks Vision** for webcam flight and pinch firing controls with keyboard failsafe.
 - **Backend (`api/index.py`)**: Asynchronous FastAPI endpoints:
   - `GET /api/health`: Health diagnostics and model reachability probing.
   - `GET /api/config`: Safe client configuration (control modes, supported formations, obstacles).
