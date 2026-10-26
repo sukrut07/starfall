@@ -53,8 +53,8 @@ scoring:
 ai:
   enabled: true
   ollama_endpoint: "http://localhost:11434"
-  primary_model: "gemma4:e2b"
-  alternative_model: "gemma4:e4b"
+  primary_model: "gemma4:e4b"
+  alternative_model: "gemma4:e2b"
   timeout_seconds: 10.0
   retry_limit: 2
   max_difficulty_delta: 1
