@@ -301,8 +301,8 @@ def main() -> None:
     play_parser.add_argument(
         "--model",
         type=str,
-        default="gemma4:e2b",
-        help="Ollama model identifier (e.g. gemma4:e2b, gemma4:e4b)",
+        default=None,
+        help="Optional Ollama model override (defaults to OLLAMA_MODEL / config; e.g. gemma4:e4b)",
     )
 
     # Command: vision-test
