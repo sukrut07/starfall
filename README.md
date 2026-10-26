@@ -146,7 +146,7 @@ sequenceDiagram
 ### Step 1: Clone and Set Up Python Environment
 
 ```bash
-git clone https://github.com/your-username/starfall.git
+git clone https://github.com/sukrut07/starfall.git
 cd starfall
 
 python3.11 -m venv .venv
@@ -156,10 +156,12 @@ pip install -r requirements.txt
 
 ### Step 2: Set Up Ollama and Gemma 4
 
+Copy `.env.example` to `.env` and keep `.env` untracked. The example configures `OLLAMA_MODEL=gemma4:e4b`; you can change it to `gemma4:e2b` if the larger model is not suitable for your machine. Local Ollama inference does not require a cloud API key by default. See [Local Model Setup](docs/LOCAL_MODEL_SETUP.md).
+
 1. Install Ollama from [ollama.com](https://ollama.com).
 2. Pull the default Gemma 4 lightweight model:
    ```bash
-   ollama pull gemma4:e2b
+   ollama pull gemma4:e4b
    ```
 3. Verify local model availability:
    ```bash
@@ -258,7 +260,7 @@ Run the test suite with `pytest`:
 pytest
 ```
 
-### Verified Test Suite (25 Tests Passing):
+### Automated Test Coverage (run locally with `pytest -q`):
 - `tests/test_collisions.py`: Circle hitboxes, laser lanes, and non-duplicate dodge detection.
 - `tests/test_scoring.py`: Kill rewards, high-score tracking, and zero-shot division safety.
 - `tests/test_gestures.py`: Pinch hysteresis, debounce frames, deadzones, and hand lost behavior.
@@ -333,6 +335,16 @@ starfall/
 │   └── test_camera.py          # Visual gesture diagnostic window
 └── tests/                      # Pytest automated test suite (25 tests)
 ```
+
+---
+
+## Developer Docs
+
+- [Antigravity master audit and build prompt](docs/ANTIGRAVITY_MASTER_PROMPT.md)
+- [Architecture and workflow diagrams](docs/ARCHITECTURE.md)
+- [Local Ollama / Gemma 4 setup](docs/LOCAL_MODEL_SETUP.md)
+- [Textmode-inspired UI specification](docs/TEXTMODE_UI_SPEC.md)
+- [Implementation verification checklist](docs/ANTIGRAVITY_AUDIT_CHECKLIST.md)
 
 ---
 
