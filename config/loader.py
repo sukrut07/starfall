@@ -74,8 +74,8 @@ class ScoringConfig(BaseModel):
 class AIConfig(BaseModel):
     enabled: bool = True
     ollama_endpoint: str = "http://localhost:11434"
-    primary_model: str = "gemma4:e2b"
-    alternative_model: str = "gemma4:e4b"
+    primary_model: str = "gemma4:e4b"
+    alternative_model: str = "gemma4:e2b"
     timeout_seconds: float = 10.0
     retry_limit: int = 2
     max_difficulty_delta: int = 1
