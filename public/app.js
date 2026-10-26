@@ -225,6 +225,15 @@
   // ==========================================================================
   // MEDIAPIPE GESTURE CONTROLLER (CLIENT-SIDE BROWSER VISION)
   // ==========================================================================
+  const HAND_CONNECTIONS = [
+    [0, 1], [1, 2], [2, 3], [3, 4],       // Thumb
+    [0, 5], [5, 6], [6, 7], [7, 8],       // Index
+    [9, 10], [10, 11], [11, 12], [0, 9],  // Middle
+    [13, 14], [14, 15], [15, 16], [0, 13],// Ring
+    [17, 18], [18, 19], [19, 20], [0, 17],// Pinky
+    [5, 9], [9, 13], [13, 17],            // Palm base
+  ];
+
   const gestureController = {
     videoEl: document.getElementById("webcamVideo"),
     canvasEl: document.getElementById("webcamCanvas"),
@@ -241,20 +250,20 @@
       smoothX: 400,
       smoothY: 420,
       lastSeen: 0,
-      alpha: 0.28, // Exponential moving average
-      deadzone: 5.0,
+      alpha: 0.32, // Responsive EMA filter
+      deadzone: 4.0,
     },
     leftHand: {
       detected: false,
       isPinching: false,
       pinchDistance: 1.0,
-      engageThreshold: 0.26, // Scale-normalized
-      releaseThreshold: 0.38,
+      engageThreshold: 0.32, // Normalized pinch distance
+      releaseThreshold: 0.45,
       lastSeen: 0,
     },
 
     async init() {
-      if (this.isInitialized) return true;
+      if (this.isInitialized && this.landmarker) return true;
       const cameraMsg = document.getElementById("cameraMsg");
 
       try {
@@ -262,7 +271,11 @@
           throw new Error("Webcam access not supported by this browser.");
         }
 
-        if (cameraMsg) cameraMsg.textContent = "Requesting webcam permission...";
+        if (cameraMsg) {
+          cameraMsg.style.display = "flex";
+          cameraMsg.textContent = "Requesting webcam access...";
+        }
+
         this.stream = await navigator.mediaDevices.getUserMedia({
           video: { width: 640, height: 480, facingMode: "user" },
           audio: false,
@@ -272,31 +285,85 @@
 
         if (cameraMsg) cameraMsg.textContent = "Loading MediaPipe hand vision model...";
 
-        // Load MediaPipe Hand Landmarker from Tasks Vision
-        if (window.FilesetResolver && window.HandLandmarker) {
-          const vision = await window.FilesetResolver.forVisionTasks(
-            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
-          );
-          this.landmarker = await window.HandLandmarker.createFromOptions(vision, {
-            baseOptions: {
-              modelAssetPath:
-                "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-              delegate: "GPU",
-            },
-            runningMode: "VIDEO",
-            numHands: 2,
-          });
+        // Ensure FilesetResolver and HandLandmarker are available via dynamic import if needed
+        if (!window.FilesetResolver || !window.HandLandmarker) {
+          try {
+            const visionBundle = await import(
+              "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs"
+            );
+            window.FilesetResolver = visionBundle.FilesetResolver;
+            window.HandLandmarker = visionBundle.HandLandmarker;
+          } catch (e1) {
+            console.warn("CDN fallback for MediaPipe vision bundle:", e1);
+            const visionBundle = await import(
+              "https://unpkg.com/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs"
+            );
+            window.FilesetResolver = visionBundle.FilesetResolver;
+            window.HandLandmarker = visionBundle.HandLandmarker;
+          }
         }
 
+        if (!window.FilesetResolver || !window.HandLandmarker) {
+          throw new Error("Could not load MediaPipe Tasks Vision library.");
+        }
+
+        const vision = await window.FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+        );
+
+        // Chain model URLs: local fast route first, Google Cloud Storage fallback
+        const candidateModels = [
+          "/models/hand_landmarker.task",
+          "/hand_landmarker.task",
+          "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+        ];
+
+        let createdLandmarker = null;
+        for (const modelPath of candidateModels) {
+          try {
+            // Attempt GPU acceleration first
+            createdLandmarker = await window.HandLandmarker.createFromOptions(vision, {
+              baseOptions: {
+                modelAssetPath: modelPath,
+                delegate: "GPU",
+              },
+              runningMode: "VIDEO",
+              numHands: 2,
+            });
+            if (createdLandmarker) break;
+          } catch (gpuErr) {
+            console.warn(`GPU delegate failed with model ${modelPath}, trying CPU...`, gpuErr);
+            try {
+              createdLandmarker = await window.HandLandmarker.createFromOptions(vision, {
+                baseOptions: {
+                  modelAssetPath: modelPath,
+                  delegate: "CPU",
+                },
+                runningMode: "VIDEO",
+                numHands: 2,
+              });
+              if (createdLandmarker) break;
+            } catch (cpuErr) {
+              console.warn(`CPU delegate failed with model ${modelPath}:`, cpuErr);
+            }
+          }
+        }
+
+        if (!createdLandmarker) {
+          throw new Error("Unable to create MediaPipe HandLandmarker instance.");
+        }
+
+        this.landmarker = createdLandmarker;
         this.isInitialized = true;
         this.isRunning = true;
+
         if (cameraMsg) cameraMsg.style.display = "none";
         this._startLoop();
         return true;
       } catch (err) {
-        console.warn("MediaPipe gesture initialization fallback:", err);
+        console.warn("MediaPipe gesture initialization error:", err);
         if (cameraMsg) {
-          cameraMsg.textContent = `Camera error: ${err.message}. Using keyboard flight controls.`;
+          cameraMsg.textContent = `Camera error: ${err.message}. Keyboard controls remain active.`;
           cameraMsg.style.color = "var(--accent-red)";
         }
         return false;
@@ -304,16 +371,20 @@
     },
 
     _startLoop() {
+      let lastVideoTime = -1;
       const processFrame = () => {
         if (!this.isRunning) return;
         const now = performance.now();
 
-        if (this.landmarker && this.videoEl.readyState >= 2) {
-          try {
-            const results = this.landmarker.detectForVideo(this.videoEl, now);
-            this._processResults(results, now);
-          } catch (e) {
-            // Non-fatal frame drop
+        if (this.landmarker && this.videoEl && this.videoEl.readyState >= 2) {
+          if (this.videoEl.currentTime !== lastVideoTime) {
+            lastVideoTime = this.videoEl.currentTime;
+            try {
+              const results = this.landmarker.detectForVideo(this.videoEl, now);
+              this._processResults(results, now);
+            } catch (e) {
+              // Non-fatal frame drop
+            }
           }
         }
         requestAnimationFrame(processFrame);
@@ -328,33 +399,102 @@
       const badgeRight = document.getElementById("badge-right-hand");
       const badgeLeft = document.getElementById("badge-left-hand");
 
-      if (results && results.landmarks && results.landmarks.length > 0) {
-        for (let i = 0; i < results.landmarks.length; i++) {
-          const lms = results.landmarks[i];
-          const handedness =
-            results.handednesses && results.handednesses[i] && results.handednesses[i][0]
-              ? results.handednesses[i][0].categoryName
-              : i === 0
-              ? "Right"
-              : "Left";
+      // Draw skeleton on preview canvas
+      if (this.canvasEl && this.videoEl) {
+        const cCtx = this.canvasEl.getContext("2d");
+        const w = (this.canvasEl.width = this.videoEl.videoWidth || 640);
+        const h = (this.canvasEl.height = this.videoEl.videoHeight || 480);
+        cCtx.clearRect(0, 0, w, h);
 
-          // Note: In mirrored webcam, "Right" hand appears on screen left
-          // Handedness from MediaPipe is mirror-reversed
-          if (handedness === "Left" || (results.landmarks.length === 1 && !foundRight)) {
-            // Right Hand (Flight Steering)
+        if (results && results.landmarks && results.landmarks.length > 0) {
+          for (let hIdx = 0; hIdx < results.landmarks.length; hIdx++) {
+            const lms = results.landmarks[hIdx];
+            const isLeftPinchHand =
+              results.landmarks.length === 2
+                ? lms[0].x > (results.landmarks[1 - hIdx] ? results.landmarks[1 - hIdx][0].x : 0.5)
+                : lms[0].x > 0.5;
+
+            // Draw bone connections
+            cCtx.lineWidth = 3;
+            cCtx.strokeStyle = isLeftPinchHand
+              ? (this.leftHand.isPinching ? "#ff2a5f" : "#00f0ff")
+              : "#00ff66";
+
+            for (const [s, e] of HAND_CONNECTIONS) {
+              const p1 = lms[s];
+              const p2 = lms[e];
+              if (p1 && p2) {
+                cCtx.beginPath();
+                cCtx.moveTo(p1.x * w, p1.y * h);
+                cCtx.lineTo(p2.x * w, p2.y * h);
+                cCtx.stroke();
+              }
+            }
+
+            // Draw joint nodes
+            for (let j = 0; j < lms.length; j++) {
+              const pt = lms[j];
+              cCtx.beginPath();
+              const isPinchTip = isLeftPinchHand && (j === 4 || j === 8);
+              cCtx.arc(pt.x * w, pt.y * h, isPinchTip ? 7 : 4, 0, 2 * Math.PI);
+              cCtx.fillStyle = isPinchTip && this.leftHand.isPinching ? "#ff2a5f" : "#ffffff";
+              cCtx.fill();
+            }
+
+            // If pinching, draw highlighted red line between thumb and index tip
+            if (isLeftPinchHand && this.leftHand.isPinching) {
+              const tTip = lms[4];
+              const iTip = lms[8];
+              cCtx.lineWidth = 5;
+              cCtx.strokeStyle = "#ff0044";
+              cCtx.beginPath();
+              cCtx.moveTo(tTip.x * w, tTip.y * h);
+              cCtx.lineTo(iTip.x * w, iTip.y * h);
+              cCtx.stroke();
+            }
+          }
+        }
+      }
+
+      if (results && results.landmarks && results.landmarks.length > 0) {
+        // Sort hands by x position in raw unmirrored camera coordinates:
+        // Lower x = User's Right Hand (Steering Interceptor)
+        // Higher x = User's Left Hand (Pinch Laser Trigger)
+        const indexedHands = results.landmarks.map((lms, idx) => ({
+          lms,
+          idx,
+          palmX: (lms[0].x + lms[5].x + lms[17].x) / 3.0,
+          palmY: (lms[0].y + lms[5].y + lms[17].y) / 3.0,
+          handedness:
+            results.handednesses && results.handednesses[idx] && results.handednesses[idx][0]
+              ? results.handednesses[idx][0].categoryName
+              : "",
+        }));
+
+        indexedHands.sort((a, b) => a.palmX - b.palmX);
+
+        for (let i = 0; i < indexedHands.length; i++) {
+          const item = indexedHands[i];
+          const lms = item.lms;
+
+          // Determine role:
+          // In dual-hand mode: first (lowest x) is Right Hand, second is Left Hand.
+          // In single-hand mode: if palmX < 0.5 -> Right Hand (steering); else Left Hand.
+          const isRightSteering =
+            indexedHands.length === 2
+              ? i === 0
+              : item.handedness === "Left" || item.palmX < 0.55;
+
+          if (isRightSteering && !foundRight) {
+            // RIGHT HAND -> Spaceship Flight Steering
             foundRight = true;
             this.rightHand.lastSeen = now;
             this.rightHand.detected = true;
 
-            // Palm center: average of wrist (0), index MCP (5), pinky MCP (17)
-            const palmX = (lms[0].x + lms[5].x + lms[17].x) / 3.0;
-            const palmY = (lms[0].y + lms[5].y + lms[17].y) / 3.0;
+            // Mirror coordinate mapping to game canvas: palmX -> targetCanvasX
+            const targetCanvasX = (1.0 - item.palmX) * 800;
+            const targetCanvasY = Math.max(80, Math.min(460, item.palmY * 480));
 
-            // Mirror coordinate mapping to canvas
-            const targetCanvasX = (1.0 - palmX) * 800;
-            const targetCanvasY = Math.max(100, Math.min(450, palmY * 480));
-
-            // Deadzone check
             const dx = targetCanvasX - this.rightHand.smoothX;
             const dy = targetCanvasY - this.rightHand.smoothY;
 
@@ -363,29 +503,37 @@
               this.rightHand.smoothY += dy * this.rightHand.alpha;
             }
 
+            // Compute pinch distance on right hand for flexible single-hand play
+            const tTipR = lms[4];
+            const iTipR = lms[8];
+            const rawPinchR = Math.hypot(tTipR.x - iTipR.x, tTipR.y - iTipR.y);
+            const handScaleR = Math.hypot(lms[0].x - lms[9].x, lms[0].y - lms[9].y) || 0.2;
+            const normPinchR = rawPinchR / handScaleR;
+            this.rightHand.pinchDistance = normPinchR;
+            if (!this.rightHand.isPinching && normPinchR <= this.leftHand.engageThreshold) {
+              this.rightHand.isPinching = true;
+            } else if (this.rightHand.isPinching && normPinchR >= this.leftHand.releaseThreshold) {
+              this.rightHand.isPinching = false;
+            }
+
             if (badgeRight) {
               badgeRight.className = "status-badge tracked";
               badgeRight.textContent = `TRACKED (${Math.round(this.rightHand.smoothX)}, ${Math.round(this.rightHand.smoothY)})`;
             }
-          }
-
-          if (handedness === "Right" || (results.landmarks.length === 2 && foundRight)) {
-            // Left Hand (Pinch Weapon Trigger)
+          } else {
+            // LEFT HAND -> Pinch Weapon Trigger
             foundLeft = true;
             this.leftHand.lastSeen = now;
             this.leftHand.detected = true;
 
-            // Distance between thumb tip (4) and index fingertip (8)
             const tTip = lms[4];
             const iTip = lms[8];
             const rawPinch = Math.hypot(tTip.x - iTip.x, tTip.y - iTip.y);
 
-            // Scale normalize by distance from wrist (0) to middle MCP (9)
             const handScale = Math.hypot(lms[0].x - lms[9].x, lms[0].y - lms[9].y) || 0.2;
             const normPinch = rawPinch / handScale;
             this.leftHand.pinchDistance = normPinch;
 
-            // Dual-threshold hysteresis
             if (!this.leftHand.isPinching && normPinch <= this.leftHand.engageThreshold) {
               this.leftHand.isPinching = true;
             } else if (this.leftHand.isPinching && normPinch >= this.leftHand.releaseThreshold) {
@@ -395,31 +543,31 @@
             if (badgeLeft) {
               if (this.leftHand.isPinching) {
                 badgeLeft.className = "status-badge pinching";
-                badgeLeft.textContent = "PINCHING [FIRING]";
+                badgeLeft.textContent = `PINCHING [FIRING] (${normPinch.toFixed(2)})`;
               } else {
                 badgeLeft.className = "status-badge tracked";
-                badgeLeft.textContent = "OPEN [READY]";
+                badgeLeft.textContent = `OPEN [READY] (${normPinch.toFixed(2)})`;
               }
             }
           }
         }
       }
 
-      // Stale frame timeout (250ms)
-      if (!foundRight && now - this.rightHand.lastSeen > 250) {
+      // Stale frame timeout (350ms)
+      if (!foundRight && now - this.rightHand.lastSeen > 350) {
         this.rightHand.detected = false;
         if (badgeRight) {
           badgeRight.className = "status-badge lost";
-          badgeRight.textContent = "LOST (HOLDING)";
+          badgeRight.textContent = "NOT DETECTED";
         }
       }
 
-      if (!foundLeft && now - this.leftHand.lastSeen > 250) {
+      if (!foundLeft && now - this.leftHand.lastSeen > 350) {
         this.leftHand.detected = false;
         this.leftHand.isPinching = false;
         if (badgeLeft) {
           badgeLeft.className = "status-badge lost";
-          badgeLeft.textContent = "LOST (CEASED)";
+          badgeLeft.textContent = "NOT DETECTED";
         }
       }
     },
@@ -819,8 +967,8 @@
     const isFiring =
       keys.fire ||
       (state.controlMode === "gesture" &&
-        gestureController.leftHand.detected &&
-        gestureController.leftHand.isPinching);
+        ((gestureController.leftHand.detected && gestureController.leftHand.isPinching) ||
+         (!gestureController.leftHand.detected && gestureController.rightHand.detected && gestureController.rightHand.isPinching)));
 
     const now = performance.now();
     if (isFiring && now - player.lastShotTime >= player.shotCooldownMs) {

@@ -1,5 +1,6 @@
 {
   "0": "main.py",
+  "1": "engine.py",
   "2": "run_camera_test",
   "4": "GameEngine",
   "5": "ollama_client.py",
@@ -15,6 +16,7 @@
   "24": "test_web_server.py",
   "25": "Antigravity Prompt — STARFALL Gesture Gameplay Implementation",
   "26": "get_deterministic_strategy",
+  "27": "ScoreKeeper",
   "28": "validate_tactical_strategy",
   "29": "STARFALL — Antigravity Repository Audit & Completion Prompt",
   "30": "main.py",
@@ -25,9 +27,15 @@
   "35": "STARFALL UI Design Specification",
   "36": "public/app.js",
   "37": "Phase 2 — reliable two-hand tracking with MediaPipe",
+  "38": "Enemy",
+  "39": "test_collisions.py",
   "40": "main.py",
   "41": "test_fastapi_serverless.py",
   "42": "GestureController",
+  "43": "WavePlan",
   "44": "STARFALL Deployment & Web Architecture Guide",
-  "45": "PinchDetector"
+  "45": "PinchDetector",
+  "46": "state.py",
+  "47": ".update",
+  "48": ".take_damage"
 }

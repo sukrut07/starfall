@@ -10,8 +10,16 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   
-  <!-- MediaPipe Tasks Vision CDN for in-browser hand tracking -->
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm/vision_bundle.js" crossorigin="anonymous"></script>
+  <!-- MediaPipe Tasks Vision ES Module Loader -->
+  <script type="module">
+    try {
+      const vision = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs");
+      window.FilesetResolver = vision.FilesetResolver;
+      window.HandLandmarker = vision.HandLandmarker;
+    } catch (e) {
+      console.warn("Module import error in head, will dynamically load in app.js:", e);
+    }
+  </script>
 </head>
 <body>
 

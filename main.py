@@ -534,6 +534,11 @@ async def proxy_to_internal_api(request: Request, path: str):
             )
 
 
+# Mount local models at /models if available
+MODELS_DIR = ROOT_DIR / "assets" / "models"
+if MODELS_DIR.is_dir():
+    app.mount("/models", StaticFiles(directory=str(MODELS_DIR)), name="models")
+
 # Mount public static assets at / for the 'app' web service
 PUBLIC_DIR = ROOT_DIR / "public"
 if PUBLIC_DIR.is_dir():

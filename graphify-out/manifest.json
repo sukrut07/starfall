@@ -192,9 +192,9 @@
     "semantic_hash": "61adf7c168fdb1dcee846e84ba06f0ee"
   },
   "main.py": {
-    "mtime": 1793007550.111681,
-    "seen": 1793007754.1353211,
-    "ast_hash": "aa30ba4267b397eac726cb11e8aba8c6",
+    "mtime": 1793008605.3549721,
+    "seen": 1793008667.3016782,
+    "ast_hash": "32b815be7d7433229a52404a81c77ec6",
     "semantic_hash": ""
   },
   "persistence/__init__.py": {
@@ -456,9 +456,9 @@
     "semantic_hash": ""
   },
   "public/app.js": {
-    "mtime": 1793006585.8269346,
-    "seen": 1793006757.206229,
-    "ast_hash": "207d36ca7a2dc76a09d4342ed20852bb",
+    "mtime": 1793008617.6043231,
+    "seen": 1793008667.3016808,
+    "ast_hash": "460fd69ac22c18f5ec3cbb7e077d9a6b",
     "semantic_hash": ""
   },
   "tests/test_fastapi_serverless.py": {
@@ -480,9 +480,9 @@
     "semantic_hash": ""
   },
   "public/index.html": {
-    "mtime": 1793006482.067874,
-    "seen": 1793006757.206254,
-    "ast_hash": "24cd28ce6f4e672b56a26ac8e045b14a",
+    "mtime": 1793008340.3452933,
+    "seen": 1793008667.301706,
+    "ast_hash": "aaf5b0e6385412ccd2a452aa956a31bb",
     "semantic_hash": ""
   },
   "requirements-desktop.txt": {
