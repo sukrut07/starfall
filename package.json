@@ -1,0 +1,22 @@
+{
+  "name": "starfall",
+  "version": "1.0.0",
+  "description": "STARFALL: Adaptive AI Arcade Shooter with MediaPipe Vision & Gemma 4 Tactical Commander",
+  "scripts": {
+    "dev": ".venv/bin/uvicorn api.index:app --reload --port 3000 || uvicorn api.index:app --reload --port 3000",
+    "start": ".venv/bin/uvicorn api.index:app --port 3000 || uvicorn api.index:app --port 3000",
+    "build": "echo 'Static assets ready in public/'",
+    "game": ".venv/bin/python main.py --mode pygame --control gesture || python main.py --mode pygame --control gesture",
+    "game:keyboard": ".venv/bin/python main.py --mode pygame --control keyboard || python main.py --mode pygame --control keyboard",
+    "test": ".venv/bin/python -m pytest || pytest"
+  },
+  "keywords": [
+    "mediapipe",
+    "arcade-game",
+    "fastapi",
+    "gemma4",
+    "computer-vision"
+  ],
+  "author": "Sukrut Dusane",
+  "license": "MIT"
+}
