@@ -79,7 +79,17 @@ class OllamaClientWrapper:
             )
             latency_ms = (time.perf_counter() - start_time) * 1000.0
 
-            content = response.get("message", {}).get("content", "")
+            # Current ollama-python returns a typed ChatResponse; tolerate mappings too.
+            message = getattr(response, "message", None)
+            content = getattr(message, "content", None)
+            if content is None and isinstance(response, dict):
+                # Current ollama-python returns a typed ChatResponse; tolerate mappings too.
+            message = getattr(response, "message", None)
+            content = getattr(message, "content", None)
+            if content is None and isinstance(response, dict):
+                content = response.get("message", {}).get("content", "")
+            content = content or ""
+            content = content or ""
             if not content:
                 return False, None, latency_ms, "Empty response from Ollama."
 
