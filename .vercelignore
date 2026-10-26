@@ -1,0 +1,25 @@
+# Vercel deployment ignore file
+# Excludes Python desktop/terminal game engine files and packages to build as a static web showcase
+main.py
+requirements.txt
+pyproject.toml
+ai/
+analytics/
+assets/
+config/
+controls/
+game/
+persistence/
+scripts/
+tests/
+ui/
+vision/
+graphify-out/
+.agents/
+.agent/
+.venv/
+.pytest_cache/
+*.task
+*.db
+*.py
+*.pyc

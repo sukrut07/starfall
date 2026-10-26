@@ -18,10 +18,10 @@
     "semantic_hash": "a2e44eeb8886fa1d743823d207e55ec5"
   },
   "ai/ollama_client.py": {
-    "mtime": 1793000602.5369167,
-    "seen": 1793002620.7232,
-    "ast_hash": "2caa968d3b970b167ce30ce5bebae062",
-    "semantic_hash": "2caa968d3b970b167ce30ce5bebae062"
+    "mtime": 1793005143.7393346,
+    "seen": 1793005182.674968,
+    "ast_hash": "042f7c0e494d69eeab08856ecc4c2671",
+    "semantic_hash": ""
   },
   "ai/prompts.py": {
     "mtime": 1793000573.618418,
@@ -90,14 +90,14 @@
     "semantic_hash": "0fa9f8c38e2d578c75619268de296154"
   },
   "config/loader.py": {
-    "mtime": 1793003556.6124496,
-    "seen": 1793004747.0163,
-    "ast_hash": "55e91530204c62b22a3ecd2173c4dcae",
+    "mtime": 1793005087.6950014,
+    "seen": 1793005182.674979,
+    "ast_hash": "ab885f461e4e3696ce71bcc7437710f8",
     "semantic_hash": ""
   },
   "config/settings.yaml": {
-    "mtime": 1793003468.5642946,
-    "seen": 1793004747.0163,
+    "mtime": 1793004956.1003525,
+    "seen": 1793005182.6749802,
     "ast_hash": "4fe7d5cfe36a7a70aa4da3832fe2c79d",
     "semantic_hash": ""
   },
@@ -120,8 +120,8 @@
     "semantic_hash": "999475d044f61cbb3a5ea02ea01ed940"
   },
   "controls/gesture.py": {
-    "mtime": 1793003707.370665,
-    "seen": 1793004747.016303,
+    "mtime": 1793004787.5617979,
+    "seen": 1793005182.674983,
     "ast_hash": "3a1b70d4b7a6fa5518079a74a40ec28f",
     "semantic_hash": ""
   },
@@ -192,9 +192,9 @@
     "semantic_hash": "61adf7c168fdb1dcee846e84ba06f0ee"
   },
   "main.py": {
-    "mtime": 1793004256.7474625,
-    "seen": 1793004747.01631,
-    "ast_hash": "b01528f355ac096dec36c3600c0996f8",
+    "mtime": 1793004848.5220146,
+    "seen": 1793005182.6749911,
+    "ast_hash": "d2b5b7d9811bf5349b5ec7bc7b3f3ca9",
     "semantic_hash": ""
   },
   "persistence/__init__.py": {
@@ -216,9 +216,9 @@
     "semantic_hash": "9acc173714c14021905aab538da641ed"
   },
   "pyproject.toml": {
-    "mtime": 1793003495.1367729,
-    "seen": 1793004747.016313,
-    "ast_hash": "c0fe16cc200b21b428a1333dbda01b8a",
+    "mtime": 1793004979.6966975,
+    "seen": 1793005182.674994,
+    "ast_hash": "97d4ad021f3fc9f0e30db182f5152589",
     "semantic_hash": ""
   },
   "renderers/__init__.py": {
@@ -246,8 +246,8 @@
     "semantic_hash": "098c7acb49f281b527c9ec8ad74378e4"
   },
   "renderers/terminal_renderer.py": {
-    "mtime": 1793003447.7053094,
-    "seen": 1793004747.016315,
+    "mtime": 1793004787.579968,
+    "seen": 1793005182.674997,
     "ast_hash": "7db4e515df31a82c5304b00c2725745a",
     "semantic_hash": ""
   },
@@ -258,14 +258,14 @@
     "semantic_hash": "48c4a626ebf5228d698f81d8b8c498c6"
   },
   "scripts/setup_ollama.py": {
-    "mtime": 1793003587.909216,
-    "seen": 1793004747.016317,
-    "ast_hash": "7bf3990982166e4c956170b9727f1e19",
+    "mtime": 1793004848.5227482,
+    "seen": 1793005182.674998,
+    "ast_hash": "dbb5db1de81cfaca375e514dba92b83d",
     "semantic_hash": ""
   },
   "scripts/test_camera.py": {
-    "mtime": 1793003727.540349,
-    "seen": 1793004747.016317,
+    "mtime": 1793004787.5803583,
+    "seen": 1793005182.674999,
     "ast_hash": "7021a8fe71c3a824918e5b2b623224a5",
     "semantic_hash": ""
   },
@@ -288,8 +288,8 @@
     "semantic_hash": "349d0b00230c7b47849836df8b8d9af1"
   },
   "tests/test_gestures.py": {
-    "mtime": 1793003886.8272455,
-    "seen": 1793004747.016319,
+    "mtime": 1793004787.580488,
+    "seen": 1793005182.675002,
     "ast_hash": "47cdec2b74290a8e91e04b8284bf6fff",
     "semantic_hash": ""
   },
@@ -336,8 +336,8 @@
     "semantic_hash": "c54fb3553b80258475200863c47d217f"
   },
   "ui/terminal_menu.py": {
-    "mtime": 1793004208.200892,
-    "seen": 1793004747.0163252,
+    "mtime": 1793004787.580645,
+    "seen": 1793005182.6750069,
     "ast_hash": "ca5b7bf1b76c7000307b6aac9dfc6b4f",
     "semantic_hash": ""
   },
@@ -360,51 +360,87 @@
     "semantic_hash": "52cfcebdb4cd84f50f33ab7f5d8ef0a5"
   },
   "vision/hand_tracker.py": {
-    "mtime": 1793003669.2731726,
-    "seen": 1793004747.0163279,
+    "mtime": 1793004787.580787,
+    "seen": 1793005182.67501,
     "ast_hash": "14014127c7357c6cff537a5a71e5017e",
     "semantic_hash": ""
   },
   "vision/pinch_detector.py": {
-    "mtime": 1793003868.626075,
-    "seen": 1793004747.0163279,
+    "mtime": 1793004787.5809126,
+    "seen": 1793005182.6750112,
     "ast_hash": "9a7573a15046a5236daee32300ccc3da",
     "semantic_hash": ""
   },
   "tests/test_web_server.py": {
-    "mtime": 1793004656.851333,
-    "seen": 1793004747.016323,
+    "mtime": 1793004792.3394299,
+    "seen": 1793005182.675005,
     "ast_hash": "0928548ad25525a06a89bd5dce208d46",
     "semantic_hash": ""
   },
   "web/app.js": {
-    "mtime": 1793004176.0707655,
-    "seen": 1793004747.016329,
+    "mtime": 1793004787.5812604,
+    "seen": 1793005182.6750112,
     "ast_hash": "cbfc9468323e47ccc73e551134e7b3d2",
     "semantic_hash": ""
   },
   "web/server.py": {
-    "mtime": 1793004610.7079706,
-    "seen": 1793004747.01633,
+    "mtime": 1793004792.3397436,
+    "seen": 1793005182.675012,
     "ast_hash": "b3da406e16d087e2b5109b897a089555",
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1793004731.7872684,
-    "seen": 1793004747.01633,
-    "ast_hash": "9a7dbf4f589fba65d664ecbc9df3d622",
+    "mtime": 1793005058.8431587,
+    "seen": 1793005182.675013,
+    "ast_hash": "df708646183c7227e543ec1d757ceb0b",
     "semantic_hash": ""
   },
   "requirements.txt": {
-    "mtime": 1793003486.0671825,
-    "seen": 1793004747.016331,
-    "ast_hash": "843a2b247972366ccdc50d152263e24b",
+    "mtime": 1793004994.1754858,
+    "seen": 1793005182.675018,
+    "ast_hash": "3a7921be4c0ea7b63d28c003f8705013",
     "semantic_hash": ""
   },
   "web/index.html": {
-    "mtime": 1793004060.6342192,
-    "seen": 1793004747.016331,
+    "mtime": 1793004787.5820541,
+    "seen": 1793005182.675018,
     "ast_hash": "1a454b1f0c1f43a6a440267d524a7084",
+    "semantic_hash": ""
+  },
+  "docs/ANTIGRAVITY_AUDIT_CHECKLIST.md": {
+    "mtime": 1793004848.521236,
+    "seen": 1793005182.6750138,
+    "ast_hash": "998d62c9259151ccfd22d98c5dc4b107",
+    "semantic_hash": ""
+  },
+  "docs/ANTIGRAVITY_GESTURE_GAMEPLAY_PROMPT.md": {
+    "mtime": 1793004848.5213523,
+    "seen": 1793005182.6750138,
+    "ast_hash": "d84b0d51323b46b5817985d9fccb47c5",
+    "semantic_hash": ""
+  },
+  "docs/ANTIGRAVITY_MASTER_PROMPT.md": {
+    "mtime": 1793004848.521601,
+    "seen": 1793005182.675015,
+    "ast_hash": "f0f717b70a581340ff5f40feccd5ed6e",
+    "semantic_hash": ""
+  },
+  "docs/ARCHITECTURE.md": {
+    "mtime": 1793004848.5216973,
+    "seen": 1793005182.675015,
+    "ast_hash": "91d7421bc2f60a38da807330384b03cc",
+    "semantic_hash": ""
+  },
+  "docs/LOCAL_MODEL_SETUP.md": {
+    "mtime": 1793004848.5217967,
+    "seen": 1793005182.675016,
+    "ast_hash": "2f7fe068dbe059ceeca5cc414c6723cb",
+    "semantic_hash": ""
+  },
+  "docs/TEXTMODE_UI_SPEC.md": {
+    "mtime": 1793004848.5218868,
+    "seen": 1793005182.6750169,
+    "ast_hash": "4e456781c978df2105701e659e36d570",
     "semantic_hash": ""
   }
 }

@@ -451,3 +451,16 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# Vercel / WSGI Serverless Entrypoint Fallback
+def handler(environ, start_response):
+    status = "200 OK"
+    headers = [("Content-type", "application/json; charset=utf-8")]
+    start_response(status, headers)
+    return [b'{"status":"ok","message":"STARFALL Companion API"}\n']
+
+
+app = handler
+application = handler
+
