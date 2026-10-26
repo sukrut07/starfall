@@ -368,6 +368,13 @@ starfall/
 │   ├── validator.py            # Independent boundary & allowlist validator
 │   ├── fallback.py             # Deterministic offline strategy generator
 │   └── strategy_graph.py       # LangGraph stateful workflow
+├── api/
+│   ├── index.py                # FastAPI serverless entrypoint for Vercel
+│   └── requirements.txt        # Serverless backend dependency manifest
+├── public/
+│   ├── index.html              # Browser-playable arcade console
+│   ├── app.js                  # 60 FPS canvas loop & browser MediaPipe tracker
+│   └── styles.css              # High-density textmode CSS tokens
 ├── persistence/
 │   ├── database.py             # SQLite schema initialization
 │   └── repositories.py         # Match, profile, and strategy storage
@@ -379,13 +386,28 @@ starfall/
 │   ├── check_environment.py    # Subsystem environment auditor
 │   ├── setup_ollama.py         # Model diagnostic wizard
 │   └── test_camera.py          # Visual gesture diagnostic window
-└── tests/                      # Pytest automated test suite (32 tests passing)
+└── tests/                      # Pytest automated test suite (39 tests passing)
 ```
 
 ---
 
-## 13. Developer Docs
+## 13. Web & Cloud Deployment (FastAPI + Vercel)
 
+STARFALL includes a browser-playable web deployment running on **FastAPI** and **Vercel Serverless Functions**:
+
+- **Frontend (`public/`)**: Browser-playable HTML5 Canvas arcade shooter rendered with textmode aesthetics. Uses browser-side **MediaPipe Tasks Vision** for two-hand webcam flight and pinch firing controls, plus keyboard fallback.
+- **Backend (`api/index.py`)**: Asynchronous FastAPI endpoints:
+  - `GET /api/health`: Health diagnostics and model reachability probing.
+  - `GET /api/config`: Safe client configuration (control modes, supported formations, obstacles).
+  - `POST /api/strategy`: Pydantic-validated telemetry input returning bounded wave strategy plans.
+  - `POST /api/analyze`: Post-match telemetry analysis generating player profile and next-run mission directives.
+- **Detailed Guide**: See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for step-by-step Vercel and local ASGI setup.
+
+---
+
+## 14. Developer Docs
+
+- [Deployment and Web Architecture Guide](docs/DEPLOYMENT.md)
 - [Antigravity master audit and build prompt](docs/ANTIGRAVITY_MASTER_PROMPT.md)
 - [Antigravity gesture gameplay prompt](docs/ANTIGRAVITY_GESTURE_GAMEPLAY_PROMPT.md)
 - [Architecture and workflow diagrams](docs/ARCHITECTURE.md)
@@ -395,9 +417,10 @@ starfall/
 
 ---
 
-## 14. License
+## 15. License
 
 - **Source Code**: MIT License.
 - **MediaPipe Hand Landmarker**: Apache 2.0.
 - **Gemma 4 Models**: Governed by Google's [Gemma Terms of Use](https://ai.google.dev/gemma/terms).
+
 

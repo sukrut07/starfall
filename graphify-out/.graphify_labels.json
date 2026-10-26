@@ -1,7 +1,6 @@
 {
   "1": "engine.py",
   "3": "PygameRenderer",
-  "4": "GameEngine",
   "6": "InputCommand",
   "12": "vision",
   "13": "ai",

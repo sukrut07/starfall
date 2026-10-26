@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STARFALL // Textmode Tactical Display &amp; AI Commander</title>
+  <meta name="description" content="Adaptive Galaga-inspired arcade shooter with local Gemma 4 tactical reasoning and MediaPipe two-hand gesture controls. Visualized in raw textmode aesthetics.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- MediaPipe Tasks Vision CDN for in-browser hand tracking -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm/vision_bundle.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <!-- SYSTEM HEADER -->
+  <header class="system-header">
+    <div class="header-left">
+      <span class="logo-symbol">&#x25C8;</span>
+      <span class="logo-title">STARFALL.TEXTMODE</span>
+      <span class="version-tag">V1.5.0 WEB</span>
+    </div>
+    <div class="header-right">
+      <div class="status-pill" id="ai-status-pill">
+        <span class="live-dot pulse" id="ai-status-dot"></span>
+        <span id="ai-status-label">AI: CHECKING...</span>
+      </div>
+      <a href="https://github.com/sukrut07/starfall" target="_blank" rel="noopener" class="btn-nav">GITHUB &UpperRightArrow;</a>
+      <button class="btn-play-header" id="btn-header-play">PLAY NOW &DownArrow;</button>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <main class="main-layout">
+
+    <!-- HERO / BANNER -->
+    <section class="hero-banner">
+      <div class="hero-tag">BROWSER ARCADE // FASTAPI BACKEND // MEDIAPIPE VISION</div>
+      <h1 class="hero-title">STARFALL: ADAPTIVE ARCADE</h1>
+      <p class="hero-subtitle">
+        Galaga-inspired tactical space shooter rendered on a dynamic retro-textmode canvas.
+        Steer with your right hand, fire laser bursts by pinching your left thumb and index finger,
+        or engage failsafe keyboard controls. Enemy wave formations adapt to your flight telemetry.
+      </p>
+    </section>
+
+    <!-- CONSOLE WORKSPACE -->
+    <div class="console-workspace">
+
+      <!-- LEFT: PLAYFIELD CANVAS & OVERLAYS -->
+      <div class="playfield-container">
+        <div class="playfield-header">
+          <span class="playfield-title">TACTICAL PLAYFIELD [800x480]</span>
+          <div class="playfield-controls">
+            <button class="btn-icon active" id="btn-toggle-scanlines" title="Toggle CRT scanlines">SCANLINES</button>
+            <button class="btn-icon active" id="btn-toggle-audio" title="Toggle sound effects">SFX: ON</button>
+            <button class="btn-icon" id="btn-pause-toggle">PAUSE [P]</button>
+          </div>
+        </div>
+
+        <div class="canvas-wrapper">
+          <canvas id="gameCanvas" width="800" height="480"></canvas>
+          <div class="scanlines" id="scanlinesOverlay"></div>
+          <div class="crt-vignette"></div>
+
+          <!-- OVERLAY 1: STARTUP SCREEN -->
+          <div class="game-overlay" id="startOverlay">
+            <h2 class="overlay-pixel-title cyan">STARFALL</h2>
+            <p class="overlay-desc">
+              Hostile formations inbound. Pilot your interceptor through adaptive enemy waves.
+              Choose your control interface to initialize launch sequence.
+            </p>
+            <div class="mode-switch-group" style="max-width: 380px; width: 100%;">
+              <button class="btn-mode-tab active" id="btn-select-keyboard">&#x2328; KEYBOARD CONTROLS</button>
+              <button class="btn-mode-tab" id="btn-select-gesture">&#x1F590; HAND GESTURES</button>
+            </div>
+            <div class="overlay-actions">
+              <button class="btn-primary-action" id="btn-start-game">INITIALIZE FLIGHT</button>
+              <button class="btn-secondary-action" id="btn-open-calibration">CALIBRATE CAMERA</button>
+            </div>
+            <div class="overlay-key-tips">
+              Controls: <kbd>WASD</kbd> or <kbd>&larr;&uarr;&darr;&rarr;</kbd> to Fly &bull; <kbd>Space</kbd> to Fire &bull; <kbd>P</kbd> Pause &bull; <kbd>R</kbd> Restart
+            </div>
+          </div>
+
+          <!-- OVERLAY 2: PAUSE SCREEN -->
+          <div class="game-overlay hidden" id="pauseOverlay">
+            <h2 class="overlay-pixel-title yellow">TACTICAL PAUSE</h2>
+            <p class="overlay-desc">Interceptor thrusters locked in holding pattern.</p>
+            <div class="overlay-actions">
+              <button class="btn-primary-action" id="btn-resume-game">RESUME FLIGHT [P]</button>
+              <button class="btn-secondary-action" id="btn-restart-game">RESTART MISSION [R]</button>
+            </div>
+          </div>
+
+          <!-- OVERLAY 3: GAME OVER SCREEN -->
+          <div class="game-overlay hidden" id="gameOverOverlay">
+            <h2 class="overlay-pixel-title red">HULL COMPROMISED</h2>
+            <p class="overlay-desc" id="game-over-summary">
+              Final Score: 0 &bull; Waves Cleared: 0 &bull; Accuracy: 0%
+            </p>
+            <div class="overlay-actions">
+              <button class="btn-primary-action" id="btn-retry-game">REDEPLOY INTERCEPTOR</button>
+              <button class="btn-secondary-action" id="btn-show-debrief">VIEW FLIGHT DEBRIEF &UpperRightArrow;</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="playfield-footer">
+          <span id="footer-fps">60 FPS</span>
+          <span id="footer-control-mode">CONTROL: KEYBOARD ACTIVE</span>
+          <span id="footer-wave-status">WAVE 01 IN PROGRESS</span>
+        </div>
+      </div>
+
+      <!-- RIGHT: SIDE INSTRUMENTATION PANEL -->
+      <aside class="instrumentation-panel">
+
+        <!-- CARD 1: CONTROL SELECTION -->
+        <div class="info-card">
+          <div class="card-title-bar">
+            <span>FLIGHT CONTROLS</span>
+            <span class="version-tag" id="active-ctrl-badge">KEYBOARD</span>
+          </div>
+          <div class="mode-switch-group">
+            <button class="btn-mode-tab active" id="tab-ctrl-keyboard">&#x2328; KEYBOARD</button>
+            <button class="btn-mode-tab" id="tab-ctrl-gesture">&#x1F590; GESTURE</button>
+          </div>
+          <p class="card-subtext" id="ctrl-hint-text">
+            Standard arcade navigation. Arrow keys or WASD for precise lateral thrusters; Spacebar to fire cannon bursts.
+          </p>
+          <button class="btn-icon" id="btn-launch-calib-side" style="width: 100%; padding: 6px;">
+            TEST WEBCAM &amp; GESTURE TRACKING &UpperRightArrow;
+          </button>
+        </div>
+
+        <!-- CARD 2: TACTICAL TELEMETRY -->
+        <div class="info-card">
+          <div class="card-title-bar">
+            <span>COMBAT TELEMETRY</span>
+            <span style="color:var(--accent-green); font-weight:700;" id="hud-score">0 PTS</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">PLAYER ACCURACY:</span>
+            <span class="telemetry-val cyan" id="hud-accuracy">0.0%</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">THREAT DODGES:</span>
+            <span class="telemetry-val green" id="hud-dodges">0</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">HULL INTEGRITY:</span>
+            <span class="telemetry-val" id="hud-lives">&#x25C6; &#x25C6; &#x25C6;</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">SURVIVAL TIME:</span>
+            <span class="telemetry-val" id="hud-time">00:00</span>
+          </div>
+        </div>
+
+        <!-- CARD 3: AI COMMANDER & FORMATION -->
+        <div class="info-card">
+          <div class="card-title-bar">
+            <span>AI TACTICAL DIRECTOR</span>
+            <span class="version-tag" id="hud-model-tag">GEMMA 4 / FALLBACK</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">ACTIVE FORMATION:</span>
+            <span class="telemetry-val red" id="hud-formation">V_FORMATION</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">OBSTACLE HAZARD:</span>
+            <span class="telemetry-val yellow" id="hud-obstacle">NONE</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">AI REASONING TIME:</span>
+            <span class="telemetry-val cyan" id="hud-latency">-- ms</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">TACTICAL SOURCE:</span>
+            <span class="telemetry-val" id="hud-source">DETERMINISTIC FALLBACK</span>
+          </div>
+        </div>
+
+        <!-- CARD 4: REASONING FEED -->
+        <div class="info-card">
+          <div class="card-title-bar">
+            <span>TACTICAL REASONING STREAM</span>
+            <span style="font-size:10px; color:var(--text-dim);">LIVE LOG</span>
+          </div>
+          <div class="tactical-log-box" id="tacticalLogBox">
+            <div class="log-entry">
+              <span class="log-time">[00:00]</span> <span class="log-tag">[SYSTEM]</span> Tactical director standing by. Telemetry window active.
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+
+  </main>
+
+  <!-- GESTURE ONBOARDING & CALIBRATION MODAL -->
+  <div class="modal-backdrop hidden" id="calibrationModal">
+    <div class="calibration-card">
+      <div class="calibration-header">
+        <span class="calibration-title">MEDIAPIPE WEBCAM GESTURE CALIBRATION</span>
+        <button class="btn-icon" id="btn-close-calib">&times;</button>
+      </div>
+
+      <div class="calibration-grid">
+        <!-- Live Video & Landmark Preview -->
+        <div class="camera-preview-wrapper">
+          <video id="webcamVideo" autoplay playsinline muted></video>
+          <canvas id="webcamCanvas"></canvas>
+          <div class="camera-loading-msg" id="cameraMsg">Click 'START CAMERA' to grant browser webcam permission.</div>
+        </div>
+
+        <!-- Instructions & Status Badges -->
+        <div class="calibration-details">
+          <div class="calibration-step">
+            <span class="step-num">[1] RIGHT HAND &bull; FLIGHT STEERING</span>
+            <p class="step-desc">
+              Raise your right hand into the camera frame. The palm center smoothly navigates your spaceship across the screen.
+            </p>
+            <div class="hand-status-indicator">
+              <span>Right Hand Position:</span>
+              <span class="status-badge lost" id="badge-right-hand">NOT DETECTED</span>
+            </div>
+          </div>
+
+          <div class="calibration-step">
+            <span class="step-num">[2] LEFT HAND &bull; PINCH TRIGGER</span>
+            <p class="step-desc">
+              Pinch your left thumb and index fingertips together to fire laser bursts. Separate them to cease fire.
+            </p>
+            <div class="hand-status-indicator">
+              <span>Left Hand Pinch:</span>
+              <span class="status-badge lost" id="badge-left-hand">NOT DETECTED</span>
+            </div>
+          </div>
+
+          <div class="calibration-step">
+            <span class="step-num">[3] SAFE POSITIONING</span>
+            <p class="step-desc">
+              Ensure both hands are visible in good lighting. If tracking drops, spaceship holds position safely.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="overlay-actions" style="justify-content: flex-end;">
+        <button class="btn-secondary-action" id="btn-skip-to-keyboard">USE KEYBOARD INSTEAD</button>
+        <button class="btn-primary-action" id="btn-confirm-gesture">START GESTURE FLIGHT &UpperRightArrow;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST-MATCH FLIGHT DEBRIEF MODAL -->
+  <div class="modal-backdrop hidden" id="debriefModal">
+    <div class="debrief-card">
+      <div class="debrief-header">
+        <h2 class="debrief-title">FLIGHT DEBRIEF &amp; EVALUATION</h2>
+        <div class="debrief-match-meta" id="debrief-meta-line">MATCH ID: -- &bull; TIMESTAMP: --</div>
+      </div>
+
+      <div class="debrief-metrics-grid">
+        <div class="metric-cell">
+          <div class="metric-cell-label">TOTAL SCORE</div>
+          <div class="metric-cell-value" id="deb-score" style="color:var(--accent-green);">0</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-cell-label">WAVES CLEARED</div>
+          <div class="metric-cell-value" id="deb-waves">0</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-cell-label">FIRING ACCURACY</div>
+          <div class="metric-cell-value cyan" id="deb-accuracy">0.0%</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-cell-label">THREAT DODGES</div>
+          <div class="metric-cell-value green" id="deb-dodges">0</div>
+        </div>
+      </div>
+
+      <div class="debrief-section-box">
+        <div class="section-box-title">PLAYSTYLE PROFILE &amp; HABIT ANALYSIS</div>
+        <div class="section-box-body" id="deb-profile-summary">
+          Analyzing movement distribution and firing habits across combat waves...
+        </div>
+      </div>
+
+      <div class="debrief-section-box objective">
+        <div class="section-box-title yellow">&#x25C8; NEXT-RUN MEASURABLE DIRECTIVE</div>
+        <div class="section-box-body" id="deb-next-mission">
+          Assessing tactical weakness...
+        </div>
+      </div>
+
+      <div class="overlay-actions" style="justify-content: flex-end;">
+        <button class="btn-primary-action" id="btn-close-debrief">DISMISS DEBRIEF</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
