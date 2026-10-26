@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "starfall"
+version = "1.0.0"
+description = "STARFALL: Adaptive AI Arcade Shooter with Gemma 4 and LangGraph"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Starfall Team" }]
+dependencies = [
+    "pygame>=2.6.0",
+    "opencv-python>=4.10.0",
+    "mediapipe>=0.10.14",
+    "ollama>=0.4.0",
+    "langgraph>=0.2.0",
+    "langchain-core>=0.3.0",
+    "pydantic>=2.8.0",
+    "numpy>=1.26.0",
+    "rich>=13.7.0",
+    "prompt_toolkit>=3.0.40",
+    "PyYAML>=6.0.1",
+    "pytest>=8.0.0",
+]
+
+[project.scripts]
+starfall = "main:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+pythonpath = ["."]
+addopts = "-v"

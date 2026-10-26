@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Pytest / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local databases & run data
+starfall.db
+config/calibration.json
+
+# Environment variables
+.env
+
+# macOS
+.DS_Store
+
+# IDE & Agent
+.idea/
+.vscode/
+.agent/

@@ -1,0 +1,74 @@
+# STARFALL Configuration Settings
+app:
+  title: "STARFALL: Adaptive AI Arcade Shooter"
+  version: "1.0.0"
+  debug: false
+  database_path: "starfall.db"
+
+display:
+  pygame_width: 800
+  pygame_height: 700
+  terminal_width: 80
+  terminal_height: 28
+  target_fps: 60
+  terminal_fps: 25
+
+controls:
+  default_mode: "keyboard"  # keyboard, gesture, mixed
+  move_speed: 400.0         # pixels per second for keyboard
+  fire_cooldown: 0.18       # minimum seconds between shots
+
+vision:
+  camera_index: 0
+  preview_enabled: true
+  preview_width: 160
+  preview_height: 120
+  model_path: "assets/models/hand_landmarker.task"
+  min_detection_confidence: 0.5
+  min_tracking_confidence: 0.5
+  smoothing_alpha: 0.28     # EMA smoothing for position
+  deadzone: 0.02
+  pinch_engage_thresh: 0.055 # normalized distance thumb-tip to index-tip
+  pinch_release_thresh: 0.085 # hysteresis release threshold
+  debounce_frames: 2
+
+gameplay:
+  starting_lives: 3
+  invulnerability_duration: 2.0
+  starting_difficulty: 2
+  max_difficulty: 5
+  max_enemies_per_wave: 18
+  max_projectile_speed: 550.0
+  player_hitbox_radius: 14.0
+  star_count: 75
+
+scoring:
+  enemy_kill: 100
+  boss_kill: 500
+  successful_dodge: 25
+  wave_completed: 250
+  bonus_target: 150
+  life_lost_penalty: 0
+
+ai:
+  enabled: true
+  ollama_endpoint: "http://localhost:11434"
+  primary_model: "gemma4:e2b"
+  alternative_model: "gemma4:e4b"
+  timeout_seconds: 10.0
+  retry_limit: 2
+  max_difficulty_delta: 1
+  min_observations_for_profile: 10
+  allowed_formations:
+    - "v_formation"
+    - "center_sweep"
+    - "left_flank"
+    - "right_flank"
+    - "split_formation"
+    - "staggered_assault"
+    - "converging_pincer"
+  allowed_obstacles:
+    - "none"
+    - "slow_moving_barriers"
+    - "telegraphed_laser_lane"
+    - "drifting_asteroids"
