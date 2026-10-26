@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import atexit
 import os
 import shutil
 import sys
@@ -20,6 +21,15 @@ class TerminalRenderer(BaseRenderer):
         self.cols = cols
         self.rows = rows
         self._initialized = False
+        # Ensure cursor restoration on any termination
+        atexit.register(self._safe_cursor_restore)
+
+    def _safe_cursor_restore(self) -> None:
+        try:
+            sys.stdout.write("\033[?25h\033[0m\n")
+            sys.stdout.flush()
+        except Exception:
+            pass
 
     def initialize(self) -> bool:
         # Hide terminal cursor and clear screen
@@ -30,8 +40,7 @@ class TerminalRenderer(BaseRenderer):
 
     def cleanup(self) -> None:
         # Restore terminal cursor and clear screen
-        sys.stdout.write("\033[?25h\033[0m\n")
-        sys.stdout.flush()
+        self._safe_cursor_restore()
         self._initialized = False
 
     def render(
@@ -127,7 +136,7 @@ class TerminalRenderer(BaseRenderer):
         # Draw Player Ship
         px = int(snapshot.player_x * sx_scale)
         py = int(snapshot.player_y * sy_scale)
-        if 0 <= px < self.cols and 0 <= gy < self.rows:
+        if 0 <= px < self.cols and 0 <= py < self.rows:
             p_char = "▲" if not snapshot.player_invulnerable or (int(snapshot.match_time * 8) % 2 == 0) else "△"
             if snapshot.player_shield:
                 if px > 0:

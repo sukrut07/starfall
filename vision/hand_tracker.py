@@ -20,10 +20,13 @@ class HandTrackingResult:
     right_confidence: float = 0.0
     right_x: float = 0.5  # Normalized 0.0 - 1.0 (mirrored for natural interaction)
     right_y: float = 0.5  # Normalized 0.0 - 1.0
+    right_scale: float = 0.20
     has_left_hand: bool = False
     left_confidence: float = 0.0
     left_thumb_tip: Tuple[float, float] = (0.0, 0.0)
     left_index_tip: Tuple[float, float] = (0.0, 0.0)
+    left_scale: float = 0.20
+    timestamp: float = 0.0
     all_hands: List[Dict[str, Any]] = field(default_factory=list)
 
 
@@ -101,10 +104,14 @@ class HandTracker:
                 "landmarks": pts,
             })
 
+            # Calculate anatomical hand scale (distance from wrist [0] to middle MCP [9])
+            palm_scale = math.hypot(pts[0][0] - pts[9][0], pts[0][1] - pts[9][1]) if len(pts) > 9 else 0.20
+
             # Right hand controls spaceship movement
             if label == "Right":
                 result.has_right_hand = True
                 result.right_confidence = score
+                result.right_scale = palm_scale
                 # Palm center estimated between wrist (0) and middle MCP (9)
                 wrist = pts[0]
                 middle_mcp = pts[9]
@@ -117,9 +124,11 @@ class HandTracker:
             elif label == "Left":
                 result.has_left_hand = True
                 result.left_confidence = score
+                result.left_scale = palm_scale
                 result.left_thumb_tip = pts[4]
                 result.left_index_tip = pts[8]
 
+        result.timestamp = time.time()
         return result
 
     def close(self) -> None:

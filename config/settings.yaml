@@ -55,7 +55,7 @@ ai:
   ollama_endpoint: "http://localhost:11434"
   primary_model: "gemma4:e2b"
   alternative_model: "gemma4:e4b"
-  timeout_seconds: 10.0
+  timeout_seconds: 30.0
   retry_limit: 2
   max_difficulty_delta: 1
   min_observations_for_profile: 10

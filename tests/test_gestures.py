@@ -73,3 +73,44 @@ def test_gesture_mapper_bounds_and_deadzone():
     gx_lost, gy_lost = mapper.update(has_right_hand=False, raw_norm_x=0.5, raw_norm_y=0.5)
     assert gx_lost is None
     assert gy_lost is None
+
+
+def test_pinch_detector_scale_normalization():
+    detector = PinchDetector(engage_threshold=0.06, debounce_frames=1)
+    
+    # Hand close to camera (large scale: 0.40 vs baseline 0.20 -> scale_ratio = 2.0)
+    # Raw distance 0.08 / 2.0 = effective 0.04 <= 0.06 -> should engage
+    res = detector.update(
+        has_left_hand=True,
+        thumb_tip=(0.5, 0.5),
+        index_tip=(0.58, 0.5),
+        hand_scale=0.40,
+    )
+    assert res is True
+    assert detector.is_pinching is True
+
+
+def test_pinch_detector_stale_frame_expiry():
+    detector = PinchDetector(engage_threshold=0.06, debounce_frames=1, stale_timeout_seconds=0.20)
+    
+    # Frame 1 at t=100.0 -> engages
+    t0 = 100.0
+    res1 = detector.update(
+        has_left_hand=True,
+        thumb_tip=(0.5, 0.5),
+        index_tip=(0.54, 0.5),
+        timestamp=t0,
+    )
+    assert res1 is True
+    assert detector.is_pinching is True
+
+    # Frame 2 arrives 0.30s later (exceeds 0.20s stale_timeout) with hand lost -> reset and released
+    res2 = detector.update(
+        has_left_hand=False,
+        thumb_tip=(0.0, 0.0),
+        index_tip=(0.0, 0.0),
+        timestamp=t0 + 0.30,
+    )
+    assert res2 is False
+    assert detector.is_pinching is False
+

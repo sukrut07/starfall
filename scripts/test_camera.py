@@ -35,8 +35,8 @@ def run_camera_test(camera_index: int = 0) -> None:
 
     try:
         while True:
-            frame = cam.get_latest_frame(mirror=True)
-            if frame is None:
+            raw_frame = cam.get_latest_frame(mirror=False)
+            if raw_frame is None:
                 time.sleep(0.01)
                 continue
 
@@ -46,7 +46,9 @@ def run_camera_test(camera_index: int = 0) -> None:
                 frames = 0
                 fps_start = time.time()
 
-            result = tracker.process_frame(frame, mirrored=False)
+            result = tracker.process_frame(raw_frame, mirrored=True)
+            # Create user-facing mirrored preview
+            frame = cv2.flip(raw_frame, 1)
             h, w = frame.shape[:2]
 
             # Draw landmarks
@@ -75,12 +77,14 @@ def run_camera_test(camera_index: int = 0) -> None:
                 cv2.circle(frame, (int(result.right_x * w), int(result.right_y * h)), 8, (0, 255, 0), 2)
                 cv2.putText(frame, "RIGHT: MOVE SHIP", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
-            # Check left hand pinch
+            # Check left hand pinch (with scale normalization)
             is_firing = pinch.update(
                 has_left_hand=result.has_left_hand,
                 thumb_tip=result.left_thumb_tip,
                 index_tip=result.left_index_tip,
                 confidence=result.left_confidence,
+                hand_scale=result.left_scale,
+                timestamp=result.timestamp,
             )
             dist_text = f"Pinch Dist: {pinch.current_distance:.3f}"
             pinch_status = "PINCH: FIRING!" if is_firing else "Left: Open"

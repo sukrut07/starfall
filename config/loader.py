@@ -9,6 +9,13 @@ import yaml
 from pydantic import BaseModel, Field
 
 
+try:
+    from dotenv import load_dotenv
+    DOTENV_AVAILABLE = True
+except ImportError:
+    DOTENV_AVAILABLE = False
+
+
 class AppConfig(BaseModel):
     title: str = "STARFALL: Adaptive AI Arcade Shooter"
     version: str = "1.0.0"
@@ -71,7 +78,8 @@ class AIConfig(BaseModel):
     ollama_endpoint: str = "http://localhost:11434"
     primary_model: str = "gemma4:e2b"
     alternative_model: str = "gemma4:e4b"
-    timeout_seconds: float = 10.0
+    api_key: Optional[str] = None
+    timeout_seconds: float = 30.0
     retry_limit: int = 2
     max_difficulty_delta: int = 1
     min_observations_for_profile: int = 10
@@ -107,7 +115,11 @@ class Settings(BaseModel):
 
 
 def load_settings(config_path: Optional[str] = None) -> Settings:
-    """Load settings from YAML file with environment variable overrides."""
+    """Load settings from YAML file with environment variable and .env overrides."""
+    if DOTENV_AVAILABLE:
+        # Load local .env if present
+        load_dotenv(override=False)
+
     data = {}
     if config_path is None:
         default_yaml = Path(__file__).parent / "settings.yaml"
@@ -127,6 +139,10 @@ def load_settings(config_path: Optional[str] = None) -> Settings:
         settings.ai.ollama_endpoint = os.environ["OLLAMA_HOST"]
     if "OLLAMA_MODEL" in os.environ:
         settings.ai.primary_model = os.environ["OLLAMA_MODEL"]
+    if "GEMMA_API_KEY" in os.environ:
+        settings.ai.api_key = os.environ["GEMMA_API_KEY"]
+    elif "OLLAMA_API_KEY" in os.environ:
+        settings.ai.api_key = os.environ["OLLAMA_API_KEY"]
     if "STARFALL_CAMERA_INDEX" in os.environ:
         try:
             settings.vision.camera_index = int(os.environ["STARFALL_CAMERA_INDEX"])
@@ -138,3 +154,4 @@ def load_settings(config_path: Optional[str] = None) -> Settings:
         settings.app.database_path = os.environ["STARFALL_DB_PATH"]
 
     return settings
+

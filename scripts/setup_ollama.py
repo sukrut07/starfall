@@ -42,7 +42,7 @@ def setup_and_diagnose() -> None:
     target_model = settings.ai.primary_model
     alt_model = settings.ai.alternative_model
 
-    client = OllamaClientWrapper(endpoint=endpoint, timeout_seconds=8.0)
+    client = OllamaClientWrapper(endpoint=endpoint, timeout_seconds=settings.ai.timeout_seconds)
     is_connected, msg, models = client.check_connection()
 
     if not is_connected:

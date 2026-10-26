@@ -39,8 +39,9 @@ def display_main_menu(console: Optional[Console] = None) -> str:
     menu_table.add_row("6", "Ollama & Gemma 4 Model Diagnostics", "Connection check, latency benchmark & test inference")
     menu_table.add_row("7", "Match History & Tactical Audit", "View past runs, AI strategies, and flight reports")
     menu_table.add_row("8", "Configuration & Settings", "Inspect game constants, timeouts, and thresholds")
-    menu_table.add_row("9", "Exit Flight Terminal", "Return to shell")
+    menu_table.add_row("9", "Textmode Web Companion Display", "Browser tactical console inspired by extension.textmode.art")
+    menu_table.add_row("10", "Exit Flight Terminal", "Return to shell")
 
     console.print(menu_table)
-    choice = Prompt.ask("\n[bold cyan]Select an option[/bold cyan]", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "q"], default="1")
+    choice = Prompt.ask("\n[bold cyan]Select an option[/bold cyan]", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "q"], default="1")
     return choice

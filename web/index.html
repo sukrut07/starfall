@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STARFALL // Textmode Tactical Display & AI Commander</title>
+  <meta name="description" content="Adaptive Galaga-inspired arcade shooter tactical display powered by Gemma 4 and MediaPipe gesture control. Visualized in raw textmode aesthetics.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700;800&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-textmode">
+
+  <!-- TOP STATUS BAR -->
+  <header class="system-header" id="sys-header">
+    <div class="header-left">
+      <div class="logo-symbol" id="logo-icon">&#x25C8;</div>
+      <span class="logo-title">starfall.textmode.ai</span>
+      <span class="version-tag">V1.4.2</span>
+    </div>
+    <nav class="header-nav">
+      <a href="#intro" class="nav-link active">HOW IT WORKS</a>
+      <a href="#live-demo" class="nav-link">LIVE DEMO</a>
+      <a href="#tactical-feed" class="nav-link">TACTICAL FEED</a>
+      <a href="#debrief" class="nav-link">FLIGHT DEBRIEF</a>
+      <a href="#model-panel" class="nav-link">MODEL INSPECTOR</a>
+      <a href="https://github.com/sukrut07/starfall" target="_blank" rel="noopener" class="nav-link">GITHUB &UpperRightArrow;</a>
+      <button class="btn-install" id="btn-quick-play" onclick="location.href='#live-demo'">RUN DISPLAY &DownArrow;</button>
+    </nav>
+  </header>
+
+  <!-- SIDEBAR NUMERIC RAIL -->
+  <aside class="side-rail" aria-label="Section Navigation">
+    <div class="rail-indicator" data-target="intro"><span class="rail-num">01</span><span class="rail-label">INTRO</span></div>
+    <div class="rail-indicator active" data-target="live-demo"><span class="rail-num">02</span><span class="rail-label">LIVE DEMO</span></div>
+    <div class="rail-indicator" data-target="tactical-feed"><span class="rail-num">03</span><span class="rail-label">TACTICAL FEED</span></div>
+    <div class="rail-indicator" data-target="debrief"><span class="rail-num">04</span><span class="rail-label">FLIGHT DEBRIEF</span></div>
+    <div class="rail-indicator" data-target="model-panel"><span class="rail-num">05</span><span class="rail-label">MODEL INSPECTOR</span></div>
+    <div class="rail-indicator" data-target="gestures"><span class="rail-num">06</span><span class="rail-label">GESTURES</span></div>
+  </aside>
+
+  <main class="content-wrapper">
+
+    <!-- SECTION 1: INTRO BANNER -->
+    <section id="intro" class="section-block intro-section">
+      <div class="breadcrumb-tag">TEXTMODE OVERLAY / FREE .+. OPEN SOURCE :: ::</div>
+      <div class="tech-spec-bar">CANVAS + VIDEO / TEXTMODE GLYPH MATRIX / GEMMA 4</div>
+      <h1 class="hero-pixel-title">TURN THE GAME<br>INTO TEXTMODE</h1>
+      <p class="hero-subtitle">
+        Real-time Galaga-inspired arcade shooter rendered in high-density ASCII glyphs.
+        Adaptive enemy tactics driven by local Gemma 4 &amp; LangGraph orchestration, with optional MediaPipe hand gesture flight controls.
+      </p>
+      <div class="cta-row">
+        <a href="#live-demo" class="btn-hero-primary">LAUNCH TACTICAL CONSOLE &UpperRightArrow;</a>
+        <a href="#model-panel" class="btn-hero-secondary">TEST GEMMA 4 INFERENCE</a>
+      </div>
+    </section>
+
+    <!-- SECTION 2: LIVE DEMO & CANVAS DISPLAY -->
+    <section id="live-demo" class="section-block demo-section">
+      <div class="section-top-bar">
+        <span class="breadcrumb-tag">FRESHLY CONVERTED / MIND THE GLYPHS</span>
+        <div class="status-indicator">
+          <span class="live-dot pulse"></span>
+          <span class="live-text" id="engine-status-text">LIVE ARCADE SIMULATION</span>
+        </div>
+      </div>
+      <h2 class="sub-pixel-title">SEE WHAT'S BEEN POURED.</h2>
+
+      <div class="interactive-workspace">
+        <!-- LEFT: TEXTMODE CANVAS / SIMULATION -->
+        <div class="screen-container">
+          <div class="screen-meta-header">
+            <span class="canvas-tag">CANVAS SELECTED [800x480]</span>
+            <div class="screen-actions">
+              <span class="badge live-badge">&#x25CF; LIVE</span>
+              <button class="btn-micro" id="btn-pause-sim">PAUSE</button>
+              <button class="btn-micro" id="btn-reset-sim">RESET SIM</button>
+            </div>
+          </div>
+          
+          <div class="canvas-wrapper">
+            <canvas id="textmodeCanvas" width="800" height="480"></canvas>
+            <div class="crt-overlay" id="crtOverlay"></div>
+            <div class="scanlines"></div>
+          </div>
+
+          <div class="density-bar">
+            <div class="density-label">DENSITY</div>
+            <button class="btn-density active" data-density="8">8PX</button>
+            <button class="btn-density" data-density="16">16PX</button>
+            <button class="btn-density" data-density="32">32PX</button>
+            <button class="btn-density" data-density="64">64PX</button>
+            <div class="density-divider"></div>
+            <div class="density-label">GLYPHS</div>
+            <button class="btn-density active" id="btn-ramp-classic">CLASSIC</button>
+            <button class="btn-density" id="btn-ramp-minimal">MINIMAL</button>
+            <button class="btn-density" id="btn-ramp-dense">DENSE</button>
+            <button class="btn-density" id="btn-invert-toggle">INVERT</button>
+          </div>
+        </div>
+
+        <!-- RIGHT: CONTROL DESK -->
+        <div class="control-desk">
+          <div class="tabs-header">
+            <button class="tab-btn active" data-tab="tab-core">01 CORE</button>
+            <button class="tab-btn" data-tab="tab-convert">02 CONVERT</button>
+            <button class="tab-btn" data-tab="tab-color">03 COLOR</button>
+            <button class="tab-btn" data-tab="tab-fx">04 FX</button>
+          </div>
+
+          <!-- TAB 1: CORE -->
+          <div class="tab-content active" id="tab-core">
+            <div class="control-row">
+              <label for="toggle-overlay" class="control-label">TEXTMODE OVERLAY</label>
+              <button class="btn-toggle active" id="toggle-overlay">ON</button>
+            </div>
+
+            <div class="control-group">
+              <div class="control-label-row">
+                <span>OPACITY</span>
+                <span class="value-readout" id="opacity-val">100%</span>
+              </div>
+              <input type="range" min="10" max="100" value="100" class="red-slider" id="slider-opacity">
+            </div>
+
+            <div class="control-group">
+              <div class="control-label-row">
+                <span>GLYPH CONTRAST</span>
+                <span class="value-readout" id="contrast-val">1.4x</span>
+              </div>
+              <input type="range" min="50" max="250" value="140" class="red-slider" id="slider-contrast">
+            </div>
+
+            <div class="control-group">
+              <div class="control-label-row">
+                <span>SIMULATION SPEED</span>
+                <span class="value-readout" id="speed-val">60 FPS</span>
+              </div>
+              <input type="range" min="15" max="120" value="60" class="red-slider" id="slider-speed">
+            </div>
+
+            <div class="mini-hud-box">
+              <div class="hud-stat-line"><span>ACTIVE MODEL:</span><strong class="cyan-text" id="hud-model-name">gemma4:e2b</strong></div>
+              <div class="hud-stat-line"><span>OLLAMA HOST:</span><span id="hud-ollama-host">localhost:11434</span></div>
+              <div class="hud-stat-line"><span>SIM WAVE:</span><strong class="yellow-text" id="hud-wave-num">WAVE 03</strong></div>
+              <div class="hud-stat-line"><span>FORMATION:</span><strong class="red-text" id="hud-formation-name">PINCER</strong></div>
+            </div>
+          </div>
+
+          <!-- TAB 2: CONVERT -->
+          <div class="tab-content" id="tab-convert">
+            <div class="control-group">
+              <div class="control-label-row">
+                <span>CHARACTER SET</span>
+              </div>
+              <div class="button-matrix">
+                <button class="btn-matrix active" id="charset-ascii">STANDARD ASCII</button>
+                <button class="btn-matrix" id="charset-blocks">BLOCK ELEMENTS</button>
+                <button class="btn-matrix" id="charset-braille">BRAILLE MATRIX</button>
+                <button class="btn-matrix" id="charset-cyber">CYBER RUNES</button>
+              </div>
+            </div>
+            <div class="control-group">
+              <div class="control-label-row">
+                <span>DITHERING ALGORITHM</span>
+              </div>
+              <div class="button-matrix">
+                <button class="btn-matrix active" id="dither-floyd">FLOYD-STEINBERG</button>
+                <button class="btn-matrix" id="dither-ordered">ORDERED (BAYER 4x4)</button>
+                <button class="btn-matrix" id="dither-none">THRESHOLD ONLY</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: COLOR -->
+          <div class="tab-content" id="tab-color">
+            <div class="control-group">
+              <div class="control-label-row">
+                <span>PALETTE PRESET</span>
+              </div>
+              <div class="button-matrix">
+                <button class="btn-matrix active" id="pal-terminal">TEXTMODE MONO</button>
+                <button class="btn-matrix" id="pal-amber">AMBER CRT</button>
+                <button class="btn-matrix" id="pal-cyan">CYAN MATRIX</button>
+                <button class="btn-matrix" id="pal-arcade">GALAGA RGB</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: FX -->
+          <div class="tab-content" id="tab-fx">
+            <div class="control-row">
+              <span class="control-label">CRT SCANLINES</span>
+              <button class="btn-toggle active" id="toggle-scanlines">ON</button>
+            </div>
+            <div class="control-row">
+              <span class="control-label">GLITCH ARTIFACTS</span>
+              <button class="btn-toggle" id="toggle-glitch">OFF</button>
+            </div>
+            <div class="control-row">
+              <span class="control-label">PHOSPHOR BLOOM</span>
+              <button class="btn-toggle active" id="toggle-bloom">ON</button>
+            </div>
+          </div>
+
+          <div class="desk-footer">
+            <span>SAME CONVERSION ENGINE</span>
+            <span>16 POST FX</span>
+            <span>CLI + PYGAME AUTHORITATIVE</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: TACTICAL FEED & LIVE TELEMETRY -->
+    <section id="tactical-feed" class="section-block feed-section">
+      <div class="breadcrumb-tag">SIGNAL DESK / LIVE TELEMETRY</div>
+      <h2 class="sub-pixel-title">TACTICAL FEED &amp; REASONING STREAM</h2>
+
+      <div class="feed-grid">
+        <!-- Telemetry Cards -->
+        <div class="telemetry-card">
+          <div class="card-label">[A] PLAYER ACCURACY</div>
+          <div class="card-huge-val" id="feed-accuracy">82.4%</div>
+          <div class="card-sub-info">Zero-denominator safe metric &bull; 142/172 hits</div>
+        </div>
+
+        <div class="telemetry-card">
+          <div class="card-label">[B] DODGES LOGGED</div>
+          <div class="card-huge-val" id="feed-dodges">14</div>
+          <div class="card-sub-info">Proximity threshold &le; 42.0 px &bull; Clean evasions</div>
+        </div>
+
+        <div class="telemetry-card">
+          <div class="card-label">[C] ACTIVE FORMATION</div>
+          <div class="card-huge-val red-text" id="feed-formation">PINCER</div>
+          <div class="card-sub-info">Validated plan &bull; Applied at Wave 03 boundary</div>
+        </div>
+
+        <div class="telemetry-card">
+          <div class="card-label">[D] GEMMA 4 REASONING TIME</div>
+          <div class="card-huge-val cyan-text" id="feed-latency">312 ms</div>
+          <div class="card-sub-info">Async thread dispatch &bull; Zero frame drops</div>
+        </div>
+      </div>
+
+      <!-- Tactical Intent Console -->
+      <div class="tactical-terminal-box">
+        <div class="terminal-header">
+          <span class="terminal-title">AI COMMANDER // STRUCTURED TACTICAL REASONING</span>
+          <span class="badge" id="ai-model-badge">MODEL: gemma4:e2b</span>
+        </div>
+        <div class="terminal-body" id="tactical-log-content">
+          <p class="log-line"><span class="log-ts">[00:42.18]</span> <span class="log-tag">[TELEMETRY]</span> Sample window evaluated: 2 waves, 142 shots fired, player camp index = 0.72 (Screen Left).</p>
+          <p class="log-line"><span class="log-ts">[00:42.50]</span> <span class="log-tag log-ai">[GEMMA 4]</span> Dispatched tactical query to Ollama schema validator...</p>
+          <p class="log-line"><span class="log-ts">[00:42.81]</span> <span class="log-tag log-plan">[PLAN READY]</span> Strategy validated: Formation=PINCER, Spawns=8, ProjectileSpeed=320, Obstacle=ASTEROID_HAZARD.</p>
+          <p class="log-line log-highlight"><span class="log-ts">[00:42.82]</span> <span class="log-tag log-intent">[INTENT]</span> "Player demonstrates heavy left-quadrant camping with 82.4% sniper accuracy. Countering with Pincer flanking sweep and asteroid corridor compression to force evasive lane transitions."</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: FLIGHT DEBRIEF & MATCH HISTORY -->
+    <section id="debrief" class="section-block debrief-section">
+      <div class="breadcrumb-tag">ARCHIVE / FLIGHT DEBRIEF</div>
+      <h2 class="sub-pixel-title">SQLITE MATCH HISTORY &amp; ANALYSIS</h2>
+
+      <div class="matches-table-container">
+        <table class="starfall-table" id="matches-table">
+          <thead>
+            <tr>
+              <th>MATCH ID</th>
+              <th>DATE / TIME</th>
+              <th class="text-right">SCORE</th>
+              <th class="text-center">WAVES</th>
+              <th class="text-right">ACCURACY</th>
+              <th class="text-right">DODGES</th>
+              <th class="text-right">SURVIVAL</th>
+            </tr>
+          </thead>
+          <tbody id="matches-tbody">
+            <tr>
+              <td colspan="7" class="text-center loading-row">Querying local SQLite database (starfall.db)...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="last-report-panel" id="last-report-panel">
+        <div class="report-header">
+          <span class="report-title">MOST RECENT POST-GAME DEBRIEF</span>
+          <button class="btn-micro" id="btn-refresh-history">REFRESH ARCHIVE</button>
+        </div>
+        <div class="report-content" id="report-content-body">
+          <div class="report-loading">Loading last match report...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: MODEL INSPECTOR & CONFIG -->
+    <section id="model-panel" class="section-block model-section">
+      <div class="breadcrumb-tag">SYSTEMS / LOCAL &amp; OPEN-WEIGHTED INFERENCE</div>
+      <h2 class="sub-pixel-title">GEMMA 4 &amp; OLLAMA INSPECTOR</h2>
+
+      <div class="model-columns">
+        <div class="model-info-box">
+          <div class="box-title">OLLAMA SERVICE STATUS</div>
+          <div class="status-indicator-big">
+            <span class="status-circle" id="ollama-status-circle"></span>
+            <span class="status-title" id="ollama-status-title">CHECKING SERVICE...</span>
+          </div>
+          <p class="status-detail" id="ollama-status-detail">Checking local endpoint http://localhost:11434...</p>
+
+          <div class="config-kv-list">
+            <div class="kv-row"><span>ENDPOINT:</span><strong id="cfg-endpoint">http://localhost:11434</strong></div>
+            <div class="kv-row"><span>ACTIVE MODEL:</span><strong class="cyan-text" id="cfg-active-model">gemma4:e2b</strong></div>
+            <div class="kv-row"><span>INSTALLED TAGS:</span><span id="cfg-installed-tags">Scanning...</span></div>
+            <div class="kv-row"><span>SCHEMA VALIDATION:</span><strong class="green-text">Pydantic v2 (Enforced)</strong></div>
+          </div>
+
+          <div class="btn-actions">
+            <button class="btn-primary" id="btn-run-inference-test">RUN TEST INFERENCE &UpperRightArrow;</button>
+            <button class="btn-secondary" id="btn-refresh-model-status">REFRESH OLLAMA STATUS</button>
+          </div>
+        </div>
+
+        <div class="model-info-box">
+          <div class="box-title">CONFIGURATION &amp; GEMMA API KEY</div>
+          <p class="config-desc">
+            Local Ollama inference does not require an API key. For remote/cloud endpoints or Gemma 4 hosted APIs, paste your API key below to write safely to <code class="code-inline">.env</code>.
+          </p>
+
+          <form id="form-config" class="config-form" onsubmit="return false;">
+            <div class="form-group">
+              <label for="input-model-name">PRIMARY OLLAMA MODEL:</label>
+              <select id="select-model" class="starfall-input">
+                <option value="gemma4:e2b">gemma4:e2b (Fast tactical response - ~8.7s cold)</option>
+                <option value="gemma4:e4b">gemma4:e4b (Deep strategic reasoning - ~20.9s cold)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="input-api-key">GEMMA 4 / GEMINI API KEY (OPTIONAL):</label>
+              <input type="password" id="input-api-key" class="starfall-input" placeholder="Paste GEMMA_API_KEY for cloud/hosted fallback...">
+            </div>
+
+            <div class="form-actions">
+              <button class="btn-primary" id="btn-save-config">SAVE TO .ENV</button>
+              <span class="save-status-msg" id="save-msg"></span>
+            </div>
+          </form>
+
+          <div class="inference-output-box" id="inference-output-box">
+            <div class="inference-output-title">STRUCTURED INFERENCE RESULT:</div>
+            <pre class="json-code" id="inference-json">Click 'RUN TEST INFERENCE' to dispatch a structured tactical reasoning request.</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: GESTURES & CONTROLS -->
+    <section id="gestures" class="section-block gesture-section">
+      <div class="breadcrumb-tag">INTERFACE / COMPUTER VISION</div>
+      <h2 class="sub-pixel-title">MEDIAPIPE GESTURE CONTROLS</h2>
+
+      <div class="gesture-cards-grid">
+        <div class="gesture-card">
+          <div class="gesture-badge">RIGHT HAND</div>
+          <h3 class="gesture-heading">FLIGHT STEERING</h3>
+          <p class="gesture-text">
+            Palm center coordinates map directly to spaceship horizontal and vertical coordinates.
+            Scale-normalized coordinates with deadzone filtering prevent micro-tremors and smooth positioning.
+          </p>
+          <div class="hud-stat-line"><span>AXIS:</span><strong>X / Y Smooth Control</strong></div>
+          <div class="hud-stat-line"><span>DEADZONE:</span><strong>5% Normalized</strong></div>
+          <div class="hud-stat-line"><span>TRACK LOSS:</span><strong>Holds Last Position</strong></div>
+        </div>
+
+        <div class="gesture-card">
+          <div class="gesture-badge red-badge">LEFT HAND</div>
+          <h3 class="gesture-heading">PINCH WEAPON TRIGGER</h3>
+          <p class="gesture-text">
+            Thumb and index fingertip pinch triggers laser cannon firing.
+            Includes dual-threshold hysteresis (engage &le; 0.055, release &ge; 0.085), debouncing, and scale normalization.
+          </p>
+          <div class="hud-stat-line"><span>TRIGGER:</span><strong>Thumb-Index Pinch</strong></div>
+          <div class="hud-stat-line"><span>HYSTERESIS:</span><strong>Dual 0.055 / 0.085</strong></div>
+          <div class="hud-stat-line"><span>TRACK LOSS:</span><strong>Immediate Weapon Cease</strong></div>
+        </div>
+
+        <div class="gesture-card">
+          <div class="gesture-badge">TERMINAL &amp; KEYBOARD</div>
+          <h3 class="gesture-heading">FAILSAFE KEYBOARD</h3>
+          <p class="gesture-text">
+            Arrow keys or WASD for movement; Spacebar for firing. Fully playable in Terminal mode or Pygame mode
+            with zero dependencies on camera or Ollama if hardware is unavailable.
+          </p>
+          <div class="hud-stat-line"><span>PORTABLE:</span><strong>macOS / Linux / Windows</strong></div>
+          <div class="hud-stat-line"><span>FALLBACK:</span><strong>Deterministic Rules</strong></div>
+          <div class="hud-stat-line"><span>LATENCY:</span><strong>&lt; 1 ms</strong></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="system-footer">
+    <div class="footer-left">
+      <span>STARFALL // ADAPTIVE AI ARCADE SHOOTER</span>
+      <span class="dim">&bull;</span>
+      <span>INSPIRATION: TEXTMODE.ART</span>
+    </div>
+    <div class="footer-right">
+      <span>LOCAL GEMMA 4 OLLAMA</span>
+      <span class="dim">&bull;</span>
+      <span>LANGGRAPH ORCHESTRATION</span>
+      <span class="dim">&bull;</span>
+      <span>MEDIAPIPE VISION</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

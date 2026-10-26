@@ -1,0 +1,374 @@
+{
+  "ai/__init__.py": {
+    "mtime": 1793000665.4924893,
+    "seen": 1793002620.7231932,
+    "ast_hash": "ba8b171391703b04a3386333a0411123",
+    "semantic_hash": "ba8b171391703b04a3386333a0411123"
+  },
+  "ai/fallback.py": {
+    "mtime": 1793000547.331168,
+    "seen": 1793002620.723198,
+    "ast_hash": "9723e8eb43a3a882d9cf88725b12b769",
+    "semantic_hash": "9723e8eb43a3a882d9cf88725b12b769"
+  },
+  "ai/model_registry.py": {
+    "mtime": 1793000584.544979,
+    "seen": 1793002620.723199,
+    "ast_hash": "a2e44eeb8886fa1d743823d207e55ec5",
+    "semantic_hash": "a2e44eeb8886fa1d743823d207e55ec5"
+  },
+  "ai/ollama_client.py": {
+    "mtime": 1793000602.5369167,
+    "seen": 1793002620.7232,
+    "ast_hash": "2caa968d3b970b167ce30ce5bebae062",
+    "semantic_hash": "2caa968d3b970b167ce30ce5bebae062"
+  },
+  "ai/prompts.py": {
+    "mtime": 1793000573.618418,
+    "seen": 1793002620.723201,
+    "ast_hash": "d43ab970f93b28f059bfd40449607bc6",
+    "semantic_hash": "d43ab970f93b28f059bfd40449607bc6"
+  },
+  "ai/schemas.py": {
+    "mtime": 1793001087.3848915,
+    "seen": 1793002620.723201,
+    "ast_hash": "bf48b8ae536045c4cab35347589e2b4a",
+    "semantic_hash": "bf48b8ae536045c4cab35347589e2b4a"
+  },
+  "ai/strategy_graph.py": {
+    "mtime": 1793000654.6038063,
+    "seen": 1793002620.723202,
+    "ast_hash": "6ba54f0f74c9b4a8741ed86e38a5f2f2",
+    "semantic_hash": "6ba54f0f74c9b4a8741ed86e38a5f2f2"
+  },
+  "ai/validator.py": {
+    "mtime": 1793000558.3406007,
+    "seen": 1793002620.723202,
+    "ast_hash": "d534ac977996e6e7ea6fb5b69a29a140",
+    "semantic_hash": "d534ac977996e6e7ea6fb5b69a29a140"
+  },
+  "analytics/__init__.py": {
+    "mtime": 1793000479.0944726,
+    "seen": 1793002620.7232032,
+    "ast_hash": "5206b67144f8ca456956770a7d1c2ef0",
+    "semantic_hash": "5206b67144f8ca456956770a7d1c2ef0"
+  },
+  "analytics/metrics.py": {
+    "mtime": 1793000414.3316445,
+    "seen": 1793002620.7232032,
+    "ast_hash": "7dbbfcdae9344dde49dd2b126a191a1a",
+    "semantic_hash": "7dbbfcdae9344dde49dd2b126a191a1a"
+  },
+  "analytics/player_profile.py": {
+    "mtime": 1793000430.480762,
+    "seen": 1793002620.7232041,
+    "ast_hash": "8e5a0dee10bad42b950568600f763e27",
+    "semantic_hash": "8e5a0dee10bad42b950568600f763e27"
+  },
+  "analytics/reports.py": {
+    "mtime": 1793000471.2964158,
+    "seen": 1793002620.7232041,
+    "ast_hash": "9a4aa5c9baf2a92e571152ca5f7d2188",
+    "semantic_hash": "9a4aa5c9baf2a92e571152ca5f7d2188"
+  },
+  "analytics/strategy_evaluation.py": {
+    "mtime": 1793000455.8125203,
+    "seen": 1793002620.723205,
+    "ast_hash": "5aa945c17abe66bf839159998a3368aa",
+    "semantic_hash": "5aa945c17abe66bf839159998a3368aa"
+  },
+  "analytics/telemetry.py": {
+    "mtime": 1793000391.5661583,
+    "seen": 1793002620.723205,
+    "ast_hash": "00fd781f26170dd1df085be8cd44c026",
+    "semantic_hash": "00fd781f26170dd1df085be8cd44c026"
+  },
+  "config/__init__.py": {
+    "mtime": 1793000005.2714708,
+    "seen": 1793002620.7232058,
+    "ast_hash": "0fa9f8c38e2d578c75619268de296154",
+    "semantic_hash": "0fa9f8c38e2d578c75619268de296154"
+  },
+  "config/loader.py": {
+    "mtime": 1792999998.9502513,
+    "seen": 1793002620.7232058,
+    "ast_hash": "f58702df247d56e0077cc7373887432f",
+    "semantic_hash": "f58702df247d56e0077cc7373887432f"
+  },
+  "config/settings.yaml": {
+    "mtime": 1792999985.2067914,
+    "seen": 1793002620.723207,
+    "ast_hash": "24c0ae09592b694cd1a7c6df9dcd2bda",
+    "semantic_hash": "24c0ae09592b694cd1a7c6df9dcd2bda"
+  },
+  "controls/__init__.py": {
+    "mtime": 1793000362.8783834,
+    "seen": 1793002620.723209,
+    "ast_hash": "49134cde46daab8a8bbd74921f713fe1",
+    "semantic_hash": "49134cde46daab8a8bbd74921f713fe1"
+  },
+  "controls/base.py": {
+    "mtime": 1793000317.2386634,
+    "seen": 1793002620.723209,
+    "ast_hash": "eacc0c6f2b95c2150bde8ba4b17084de",
+    "semantic_hash": "eacc0c6f2b95c2150bde8ba4b17084de"
+  },
+  "controls/calibration.py": {
+    "mtime": 1793000357.005153,
+    "seen": 1793002620.72321,
+    "ast_hash": "999475d044f61cbb3a5ea02ea01ed940",
+    "semantic_hash": "999475d044f61cbb3a5ea02ea01ed940"
+  },
+  "controls/gesture.py": {
+    "mtime": 1793000349.9779465,
+    "seen": 1793002620.72321,
+    "ast_hash": "6e3297e21549ae35e875d3d37f6bf738",
+    "semantic_hash": "6e3297e21549ae35e875d3d37f6bf738"
+  },
+  "controls/keyboard.py": {
+    "mtime": 1793000333.5504665,
+    "seen": 1793002620.723211,
+    "ast_hash": "b239e7be92d825097dd6091f1afdf87d",
+    "semantic_hash": "b239e7be92d825097dd6091f1afdf87d"
+  },
+  "game/__init__.py": {
+    "mtime": 1793000190.1092372,
+    "seen": 1793002620.723212,
+    "ast_hash": "a7e0a15b2aa9d1a2dbc78368ff149af2",
+    "semantic_hash": "a7e0a15b2aa9d1a2dbc78368ff149af2"
+  },
+  "game/collisions.py": {
+    "mtime": 1793000056.604303,
+    "seen": 1793002620.723212,
+    "ast_hash": "f271f5858e6e8bba0bbac73c3b482009",
+    "semantic_hash": "f271f5858e6e8bba0bbac73c3b482009"
+  },
+  "game/enemies.py": {
+    "mtime": 1793000081.3536952,
+    "seen": 1793002620.723213,
+    "ast_hash": "c412dcca229592812675843d355a5152",
+    "semantic_hash": "c412dcca229592812675843d355a5152"
+  },
+  "game/engine.py": {
+    "mtime": 1793000182.4949815,
+    "seen": 1793002620.723213,
+    "ast_hash": "ba8b383c73559bbea95d66e1bd839b81",
+    "semantic_hash": "ba8b383c73559bbea95d66e1bd839b81"
+  },
+  "game/entities.py": {
+    "mtime": 1793000030.918009,
+    "seen": 1793002620.723213,
+    "ast_hash": "2a5f18fa4c2c6c68818603b454382c84",
+    "semantic_hash": "2a5f18fa4c2c6c68818603b454382c84"
+  },
+  "game/obstacles.py": {
+    "mtime": 1793000092.8669133,
+    "seen": 1793002620.7232141,
+    "ast_hash": "772921192dfd34cc190617366abe962e",
+    "semantic_hash": "772921192dfd34cc190617366abe962e"
+  },
+  "game/projectiles.py": {
+    "mtime": 1793000105.8920965,
+    "seen": 1793002620.723215,
+    "ast_hash": "2c4fc34e7d8d8ca3c78ad58242fa1d53",
+    "semantic_hash": "2c4fc34e7d8d8ca3c78ad58242fa1d53"
+  },
+  "game/scoring.py": {
+    "mtime": 1793000043.0279052,
+    "seen": 1793002620.723215,
+    "ast_hash": "93e9a49e89f47e748e70da19abc092f6",
+    "semantic_hash": "93e9a49e89f47e748e70da19abc092f6"
+  },
+  "game/state.py": {
+    "mtime": 1793000137.9939914,
+    "seen": 1793002620.7232158,
+    "ast_hash": "c61dc10e87191fe5f5927a95c26efc51",
+    "semantic_hash": "c61dc10e87191fe5f5927a95c26efc51"
+  },
+  "game/waves.py": {
+    "mtime": 1793000124.9343407,
+    "seen": 1793002620.7232158,
+    "ast_hash": "61adf7c168fdb1dcee846e84ba06f0ee",
+    "semantic_hash": "61adf7c168fdb1dcee846e84ba06f0ee"
+  },
+  "main.py": {
+    "mtime": 1793001184.4290318,
+    "seen": 1793002620.723217,
+    "ast_hash": "966934a385cd3e7e543966a2d02b00cb",
+    "semantic_hash": "966934a385cd3e7e543966a2d02b00cb"
+  },
+  "persistence/__init__.py": {
+    "mtime": 1793000506.0374177,
+    "seen": 1793002620.723217,
+    "ast_hash": "929de928f74737eb696e2a4328a7a856",
+    "semantic_hash": "929de928f74737eb696e2a4328a7a856"
+  },
+  "persistence/database.py": {
+    "mtime": 1793000489.1632085,
+    "seen": 1793002620.723218,
+    "ast_hash": "069c58852d07b1e0b5113c2597339437",
+    "semantic_hash": "069c58852d07b1e0b5113c2597339437"
+  },
+  "persistence/repositories.py": {
+    "mtime": 1793000500.3711681,
+    "seen": 1793002620.723218,
+    "ast_hash": "9acc173714c14021905aab538da641ed",
+    "semantic_hash": "9acc173714c14021905aab538da641ed"
+  },
+  "pyproject.toml": {
+    "mtime": 1793000236.0159159,
+    "seen": 1793002620.723219,
+    "ast_hash": "5cd1914f3a758e038b15357b665596e8",
+    "semantic_hash": "5cd1914f3a758e038b15357b665596e8"
+  },
+  "renderers/__init__.py": {
+    "mtime": 1793000827.7282834,
+    "seen": 1793002620.723219,
+    "ast_hash": "937dcf5562a4daa087c2339adf2f7f47",
+    "semantic_hash": "937dcf5562a4daa087c2339adf2f7f47"
+  },
+  "renderers/base.py": {
+    "mtime": 1793000721.8735392,
+    "seen": 1793002620.723219,
+    "ast_hash": "66501f94655df0429adda14796e3f3e7",
+    "semantic_hash": "66501f94655df0429adda14796e3f3e7"
+  },
+  "renderers/hud.py": {
+    "mtime": 1793000739.918954,
+    "seen": 1793002620.7232199,
+    "ast_hash": "9ea85c8e420580330a9ad932db618403",
+    "semantic_hash": "9ea85c8e420580330a9ad932db618403"
+  },
+  "renderers/pygame_renderer.py": {
+    "mtime": 1793000817.530565,
+    "seen": 1793002620.723221,
+    "ast_hash": "098c7acb49f281b527c9ec8ad74378e4",
+    "semantic_hash": "098c7acb49f281b527c9ec8ad74378e4"
+  },
+  "renderers/terminal_renderer.py": {
+    "mtime": 1793000767.3477328,
+    "seen": 1793002620.723221,
+    "ast_hash": "4f190c3e362803d6c56060ea75c84d3f",
+    "semantic_hash": "4f190c3e362803d6c56060ea75c84d3f"
+  },
+  "scripts/check_environment.py": {
+    "mtime": 1793000908.1818635,
+    "seen": 1793002620.723221,
+    "ast_hash": "48c4a626ebf5228d698f81d8b8c498c6",
+    "semantic_hash": "48c4a626ebf5228d698f81d8b8c498c6"
+  },
+  "scripts/setup_ollama.py": {
+    "mtime": 1793000934.2128596,
+    "seen": 1793002620.723223,
+    "ast_hash": "d2f0672c3349759dcc7fdd1c84c22793",
+    "semantic_hash": "d2f0672c3349759dcc7fdd1c84c22793"
+  },
+  "scripts/test_camera.py": {
+    "mtime": 1793000949.0771568,
+    "seen": 1793002620.7232242,
+    "ast_hash": "54f6c156faf529a30f660a8f9f4962d0",
+    "semantic_hash": "54f6c156faf529a30f660a8f9f4962d0"
+  },
+  "tests/test_collisions.py": {
+    "mtime": 1793000211.021311,
+    "seen": 1793002620.7232242,
+    "ast_hash": "976d75f0dc484f05412f006716de5bf1",
+    "semantic_hash": "976d75f0dc484f05412f006716de5bf1"
+  },
+  "tests/test_fallback.py": {
+    "mtime": 1793000691.0059102,
+    "seen": 1793002620.723225,
+    "ast_hash": "4ee676cb39bb708dcf23568a9d0dca1c",
+    "semantic_hash": "4ee676cb39bb708dcf23568a9d0dca1c"
+  },
+  "tests/test_game_modes.py": {
+    "mtime": 1793001128.6468234,
+    "seen": 1793002620.723225,
+    "ast_hash": "349d0b00230c7b47849836df8b8d9af1",
+    "semantic_hash": "349d0b00230c7b47849836df8b8d9af1"
+  },
+  "tests/test_gestures.py": {
+    "mtime": 1793000376.0819013,
+    "seen": 1793002620.723226,
+    "ast_hash": "992a9f60690672d1cc72176b8faad409",
+    "semantic_hash": "992a9f60690672d1cc72176b8faad409"
+  },
+  "tests/test_metrics.py": {
+    "mtime": 1793000701.6531763,
+    "seen": 1793002620.723226,
+    "ast_hash": "eed0607ec1c965d261e002a7da5cb5c5",
+    "semantic_hash": "eed0607ec1c965d261e002a7da5cb5c5"
+  },
+  "tests/test_scoring.py": {
+    "mtime": 1793000201.2330437,
+    "seen": 1793002620.7232268,
+    "ast_hash": "f7d430fcd12a2268b34ef08216d2142a",
+    "semantic_hash": "f7d430fcd12a2268b34ef08216d2142a"
+  },
+  "tests/test_smoke.py": {
+    "mtime": 1793001146.6446834,
+    "seen": 1793002620.7232268,
+    "ast_hash": "5cb532774291ef4172c0eb9324a24c21",
+    "semantic_hash": "5cb532774291ef4172c0eb9324a24c21"
+  },
+  "tests/test_strategy_validation.py": {
+    "mtime": 1793000680.3611627,
+    "seen": 1793002620.723228,
+    "ast_hash": "38cae5b173a8ba196c431052d09d2a5e",
+    "semantic_hash": "38cae5b173a8ba196c431052d09d2a5e"
+  },
+  "ui/__init__.py": {
+    "mtime": 1793000878.3247716,
+    "seen": 1793002620.723228,
+    "ast_hash": "02d49c5882eb6f2b108a50586af0d4c8",
+    "semantic_hash": "02d49c5882eb6f2b108a50586af0d4c8"
+  },
+  "ui/results_screen.py": {
+    "mtime": 1793000850.069881,
+    "seen": 1793002620.723229,
+    "ast_hash": "8cf5b7c3e6a899c9966947e98c7d86c2",
+    "semantic_hash": "8cf5b7c3e6a899c9966947e98c7d86c2"
+  },
+  "ui/settings_menu.py": {
+    "mtime": 1793000859.4523337,
+    "seen": 1793002620.723229,
+    "ast_hash": "c54fb3553b80258475200863c47d217f",
+    "semantic_hash": "c54fb3553b80258475200863c47d217f"
+  },
+  "ui/terminal_menu.py": {
+    "mtime": 1793000871.9323676,
+    "seen": 1793002620.72323,
+    "ast_hash": "4f43f072145ef57a9a8a57d91063ac35",
+    "semantic_hash": "4f43f072145ef57a9a8a57d91063ac35"
+  },
+  "vision/__init__.py": {
+    "mtime": 1793000309.500278,
+    "seen": 1793002620.72323,
+    "ast_hash": "371a63e77e1dfb9479672511a732836e",
+    "semantic_hash": "371a63e77e1dfb9479672511a732836e"
+  },
+  "vision/camera.py": {
+    "mtime": 1793000252.7238352,
+    "seen": 1793002620.723231,
+    "ast_hash": "d4e56470f511f5dfa25a794114f56651",
+    "semantic_hash": "d4e56470f511f5dfa25a794114f56651"
+  },
+  "vision/gesture_mapper.py": {
+    "mtime": 1793000303.065226,
+    "seen": 1793002620.723231,
+    "ast_hash": "52cfcebdb4cd84f50f33ab7f5d8ef0a5",
+    "semantic_hash": "52cfcebdb4cd84f50f33ab7f5d8ef0a5"
+  },
+  "vision/hand_tracker.py": {
+    "mtime": 1793000279.9163074,
+    "seen": 1793002620.723232,
+    "ast_hash": "0c0bdc43fbb123d2e14378b99f9907da",
+    "semantic_hash": "0c0bdc43fbb123d2e14378b99f9907da"
+  },
+  "vision/pinch_detector.py": {
+    "mtime": 1793000290.7444322,
+    "seen": 1793002620.723232,
+    "ast_hash": "6c2a13e5642e89c3101f757ca0dd62e5",
+    "semantic_hash": "6c2a13e5642e89c3101f757ca0dd62e5"
+  }
+}

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 from typing import Dict, Optional, Tuple, Any
+import cv2
 import numpy as np
 
 from controls.base import BaseController
@@ -64,13 +65,20 @@ class GestureController(BaseController):
         if not self.is_camera_active:
             return cmd
 
-        frame = self.camera.get_latest_frame(mirror=True)
-        if frame is None:
+        # Fetch raw unmirrored frame so MediaPipe classifies anatomical handedness correctly
+        raw_frame = self.camera.get_latest_frame(mirror=False)
+        if raw_frame is None:
+            # Stale / missing frame: hold last ship position if known
+            if self.last_target_x is not None and self.last_target_y is not None:
+                cmd.absolute_pos = True
+                cmd.target_x = self.last_target_x
+                cmd.target_y = self.last_target_y
             return cmd
 
-        self.latest_frame = frame
-        # Process frame with tracker (frame is already mirrored)
-        self.last_result = self.tracker.process_frame(frame, mirrored=False)
+        # Process with MediaPipe; mirror coordinates (1.0 - x) for natural user mirror-view
+        self.last_result = self.tracker.process_frame(raw_frame, mirrored=True)
+        # Flip frame horizontally for user visual preview
+        self.latest_frame = cv2.flip(raw_frame, 1)
 
         # 1. Right hand movement mapping
         if self.last_result.has_right_hand:
@@ -86,18 +94,27 @@ class GestureController(BaseController):
                 cmd.target_y = gy
                 self.last_target_x = gx
                 self.last_target_y = gy
+        else:
+            # Explicit hand-loss behavior: hold last position rather than jumping to stale coords
+            if self.last_target_x is not None and self.last_target_y is not None:
+                cmd.absolute_pos = True
+                cmd.target_x = self.last_target_x
+                cmd.target_y = self.last_target_y
 
-        # 2. Left hand pinch firing
+        # 2. Left hand pinch firing (with scale normalization & stale protection)
         is_firing = self.pinch_detector.update(
             has_left_hand=self.last_result.has_left_hand,
             thumb_tip=self.last_result.left_thumb_tip,
             index_tip=self.last_result.left_index_tip,
             confidence=self.last_result.left_confidence,
+            hand_scale=self.last_result.left_scale,
+            timestamp=self.last_result.timestamp,
         )
         cmd.fire = is_firing
         self.last_fire_state = is_firing
 
         return cmd
+
 
     def get_debug_info(self) -> Dict[str, Any]:
         """Telemetry and status for HUD overlays."""
