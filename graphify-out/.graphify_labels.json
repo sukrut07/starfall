@@ -1,1 +1,15 @@
-{"0": "main.py", "1": "engine.py", "2": "gesture.py", "3": "PygameRenderer", "4": "GameEngine", "5": "create_strategy_graph", "6": "InputCommand", "7": "typing", "8": "loader.py", "9": "ai/__init__.py", "10": "check_environment.py", "11": "OllamaClientWrapper", "12": "vision", "13": "ai", "14": "gameplay", "15": "display", "16": "scoring", "17": "settings.yaml", "18": "app", "19": "starfall"}
+{
+  "0": "main.py",
+  "1": "engine.py",
+  "3": "PygameRenderer",
+  "4": "GameEngine",
+  "6": "InputCommand",
+  "12": "vision",
+  "13": "ai",
+  "14": "gameplay",
+  "15": "display",
+  "16": "scoring",
+  "17": "settings.yaml",
+  "18": "app",
+  "19": "starfall"
+}
