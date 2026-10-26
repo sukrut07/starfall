@@ -163,7 +163,7 @@ class StarfallWebHandler(BaseHTTPRequestHandler):
             report = repo.get_last_match_report()
             db_conn.close()
             if report:
-                self._send_json({"report": report.to_dict()})
+                self._send_json({"report": report if isinstance(report, dict) else report.to_dict()})
             else:
                 self._send_json({"report": None, "message": "No matches logged yet."})
         except Exception as e:
@@ -214,36 +214,46 @@ class StarfallWebHandler(BaseHTTPRequestHandler):
 
         from analytics.telemetry import TelemetryCollector
         c = TelemetryCollector("web_test_match")
-        c.record("shot_fired", {"x": 400, "y": 600})
-        c.record("enemy_killed", {"enemy_type": "elite", "x": 400, "y": 200})
+        for i in range(12):
+            c.record("player_position", {"x": 250 + (i * 10), "y": 620})
+        for _ in range(6):
+            c.record("shot_fired", {"x": 300, "y": 600})
+            c.record("shot_hit", {"x": 300, "y": 200})
+        c.record("enemy_killed", {"enemy_type": "elite", "x": 300, "y": 200})
         c.record("projectile_dodge", {"distance": 22.0})
 
-        metrics = compute_metrics(c.events, wave_count=2, match_duration=45.0)
+        metrics = compute_metrics(c.events, total_duration=45.0)
         profile = build_profile(metrics)
 
         start_time = time.time()
-        plan, reasoning = orchestrator.reason_synchronous(metrics, profile, current_wave=2)
+        plan, outcome, status_text = orchestrator.execute_graph_sync(
+            wave=2,
+            telemetry_events=c.events,
+            previous_strategy={},
+            recent_outcomes=[],
+            current_difficulty=2,
+        )
         latency = round((time.time() - start_time) * 1000.0, 1)
 
         result = {
             "model_used": model_name,
             "latency_ms": latency,
             "is_fallback": plan.is_fallback,
-            "fallback_reason": plan.fallback_reason,
+            "fallback_reason": plan.reason if plan.is_fallback else None,
             "strategy": {
                 "formation": plan.formation,
                 "spawn_count": plan.spawn_count,
                 "projectile_speed": plan.projectile_speed,
-                "fire_rate_multiplier": plan.fire_rate_multiplier,
-                "obstacle_type": plan.obstacle_type,
-                "difficulty_rating": plan.difficulty_rating,
-                "tactical_intent": plan.tactical_intent,
+                "obstacle_type": plan.obstacle,
+                "difficulty_rating": plan.difficulty,
+                "tactical_intent": plan.reason,
             },
-            "reasoning": reasoning,
+            "status_text": status_text,
+            "reasoning": plan.reason,
             "profile": {
-                "playstyle": profile.playstyle.value,
+                "playstyle": profile.playstyle_tag,
                 "confidence": profile.confidence,
-                "weakness": profile.primary_weakness,
+                "weakness": profile.observed_weakness,
             },
         }
         self._send_json(result)
