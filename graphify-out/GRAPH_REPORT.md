@@ -1,32 +1,31 @@
 # Graph Report - Starfall  (2026-10-26)
 
 ## Corpus Check
-- 66 files · ~27,875 words
+- 72 files · ~34,068 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 4 file(s) not represented in the graph (top: .example 1, (none) 1, .task 1)
 
 ## Summary
-- 665 nodes · 1660 edges · 24 communities (20 shown, 4 thin omitted)
+- 725 nodes · 1721 edges · 38 communities (31 shown, 7 thin omitted)
 - Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 185 edges (avg confidence: 0.89)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ed8e1111`
+- Built from commit: `2f78c43a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - main.py
 - engine.py
-- gesture.py
 - PygameRenderer
 - GameEngine
-- create_strategy_graph
+- ollama_client.py
 - InputCommand
-- server.py
+- test_web_server.py
 - OllamaClientWrapper
-- typing
-- main.py
+- OllamaClientWrapper
+- create_strategy_graph
 - STARFALL: Adaptive AI Arcade Shooter
 - vision
 - ai
@@ -39,6 +38,20 @@
 - run_camera_test
 - PinchDetector
 - app.js
+- GestureController
+- AIStrategyOrchestrator
+- Antigravity Prompt — STARFALL Gesture Gameplay Implementation
+- get_deterministic_strategy
+- ai/__init__.py
+- validate_tactical_strategy
+- STARFALL — Antigravity Repository Audit & Completion Prompt
+- GestureMapper
+- prompts.py
+- Local Ollama + Gemma 4 Setup
+- Antigravity Verification Checklist
+- STARFALL Architecture
+- STARFALL UI Design Specification
+- Phase 2 — reliable two-hand tracking with MediaPipe
 
 ## God Nodes (most connected - your core abstractions)
 1. `GameEngine` - 47 edges
@@ -59,59 +72,51 @@
   ai/strategy_graph.py → analytics/strategy_evaluation.py
 - `AIStrategyOrchestrator` --uses--> `WavePlan`  [INFERRED]
   ai/strategy_graph.py → game/waves.py
-- `MatchRepository` --uses--> `StrategyOutcome`  [INFERRED]
-  persistence/repositories.py → analytics/strategy_evaluation.py
-- `run_game()` --uses--> `Settings`  [INFERRED]
-  main.py → config/loader.py
+- `StarfallWebHandler` --uses--> `AIStrategyOrchestrator`  [INFERRED]
+  web/server.py → ai/strategy_graph.py
+- `StarfallWebHandler` --uses--> `TelemetryCollector`  [INFERRED]
+  web/server.py → analytics/telemetry.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (24 total, 4 thin omitted)
+## Communities (38 total, 7 thin omitted)
 
 ### Community 0 - "main.py"
-Cohesion: 0.05
-Nodes (15): AIStrategyOrchestrator, worker(), build_profile(), PlayerProfile, generate_next_mission(), PostGameReport, TelemetryCollector, main() (+7 more)
+Cohesion: 0.06
+Nodes (23): aggregate_metrics_node(), build_player_profile_node(), evaluate_previous_strategy_node(), AggregatedMetrics, compute_metrics(), build_profile(), PlayerProfile, generate_next_mission() (+15 more)
 
 ### Community 1 - "engine.py"
-Cohesion: 0.07
-Nodes (25): prepare_wave_plan_node(), check_circle_collision(), check_point_in_laser_lane(), check_projectile_dodge(), spawn_formation(), Enemy, EnemyType, Entity (+17 more)
-
-### Community 2 - "gesture.py"
-Cohesion: 0.12
-Nodes (6): GestureController, test_gesture_mapper_bounds_and_deadzone(), CalibrationOffsets, GestureMapper, HandTracker, HandTrackingResult
+Cohesion: 0.06
+Nodes (25): check_circle_collision(), check_point_in_laser_lane(), check_projectile_dodge(), spawn_formation(), Enemy, EnemyType, Entity, EntityType (+17 more)
 
 ### Community 3 - "PygameRenderer"
 Cohesion: 0.06
-Nodes (7): GameStateSnapshot, GameStatus, BaseRenderer, format_hud_header(), format_tactical_panel(), PygameRenderer, TerminalRenderer
+Nodes (6): GameStateSnapshot, BaseRenderer, format_hud_header(), format_tactical_panel(), PygameRenderer, TerminalRenderer
 
 ### Community 4 - "GameEngine"
-Cohesion: 0.07
-Nodes (11): GameEngine, Particle, ScoreKeeper, InputCommand, test_headless_game_simulation_lifecycle(), test_strategy_queue_at_wave_boundary(), test_terminal_renderer_snapshot_generation(), test_dodge_and_wave_scoring() (+3 more)
-
-### Community 5 - "create_strategy_graph"
-Cohesion: 0.06
-Nodes (24): get_deterministic_strategy(), build_post_game_prompt(), build_wave_prompt(), PostGameAnalysisResponse, TacticalStrategyResponse, create_strategy_graph(), aggregate_metrics_node(), build_player_profile_node() (+16 more)
+Cohesion: 0.09
+Nodes (10): GameEngine, ScoreKeeper, InputCommand, test_headless_game_simulation_lifecycle(), test_strategy_queue_at_wave_boundary(), test_terminal_renderer_snapshot_generation(), test_dodge_and_wave_scoring(), test_initial_scoring_state() (+2 more)
 
 ### Community 6 - "InputCommand"
 Cohesion: 0.09
 Nodes (3): BaseController, PygameKeyboardController, TerminalKeyboardController
 
-### Community 7 - "server.py"
-Cohesion: 0.12
-Nodes (4): test_web_matches_endpoint(), test_web_status_endpoint(), web_server(), start_server()
+### Community 7 - "test_web_server.py"
+Cohesion: 0.15
+Nodes (6): load_calibration(), save_calibration(), test_web_matches_endpoint(), test_web_status_endpoint(), web_server(), CalibrationOffsets
 
 ### Community 8 - "OllamaClientWrapper"
-Cohesion: 0.05
-Nodes (19): get_model_info(), list_supported_models(), ModelMetadata, OllamaClientWrapper, GraphState, AIConfig, AppConfig, ControlsConfig (+11 more)
+Cohesion: 0.06
+Nodes (13): AIConfig, AppConfig, ControlsConfig, DisplayConfig, GameplayConfig, load_settings(), ScoringConfig, Settings (+5 more)
 
-### Community 9 - "typing"
-Cohesion: 0.16
-Nodes (4): AggregatedMetrics, NextRunMission, evaluate_strategy_outcome(), StrategyOutcome
+### Community 10 - "create_strategy_graph"
+Cohesion: 0.14
+Nodes (5): create_strategy_graph(), prepare_wave_plan_node(), select_fallback_node(), validate_strategy_node(), WavePlan
 
 ### Community 11 - "STARFALL: Adaptive AI Arcade Shooter"
 Cohesion: 0.07
-Nodes (26): 10. Automated Testing, 11. Command-Line Reference, 12. Project Directory Structure, 13. License, 1. Project Overview, 2. System Architecture, 3. Adaptive Enemy Director Workflow, 4. Hardware and Model Configuration (+18 more)
+Nodes (27): 10. Automated Testing, 11. Command-Line Reference, 12. Project Directory Structure, 13. Developer Docs, 14. License, 1. Project Overview, 2. System Architecture, 3. Adaptive Enemy Director Workflow (+19 more)
 
 ### Community 12 - "vision"
 Cohesion: 0.15
@@ -141,33 +146,85 @@ Nodes (4): controls, default_mode, fire_cooldown, move_speed
 Cohesion: 0.40
 Nodes (5): app, database_path, debug, title, version
 
+### Community 20 - "run_camera_test"
+Cohesion: 0.19
+Nodes (3): check_all(), run_camera_test(), CameraService
+
 ### Community 21 - "PinchDetector"
-Cohesion: 0.25
+Cohesion: 0.30
 Nodes (5): test_pinch_detector_engage_and_release_hysteresis(), test_pinch_detector_left_hand_lost(), test_pinch_detector_scale_normalization(), test_pinch_detector_stale_frame_expiry(), PinchDetector
 
 ### Community 22 - "app.js"
 Cohesion: 0.27
 Nodes (4): renderTextmode(), resetEnemies(), tick(), updateSimulation()
 
+### Community 23 - "GestureController"
+Cohesion: 0.16
+Nodes (3): GestureController, HandTracker, HandTrackingResult
+
+### Community 25 - "Antigravity Prompt — STARFALL Gesture Gameplay Implementation"
+Cohesion: 0.15
+Nodes (13): Antigravity Prompt — STARFALL Gesture Gameplay Implementation, Definition of done, Mission, Phase 0 — inspect, report, then implement, Phase 10 — Git workflow, Phase 1 — get the local Python and Ollama environment correct, Phase 3 — make the game input and engine integration correct, Phase 4 — local AI tactical director with LangGraph (+5 more)
+
+### Community 26 - "get_deterministic_strategy"
+Cohesion: 0.27
+Nodes (5): get_deterministic_strategy(), test_deterministic_fallback_no_metrics(), test_fallback_adapts_to_camping(), test_fallback_adapts_to_left_bias(), test_fallback_scales_with_wave()
+
+### Community 27 - "ai/__init__.py"
+Cohesion: 0.25
+Nodes (4): get_model_info(), list_supported_models(), ModelMetadata, GraphState
+
+### Community 28 - "validate_tactical_strategy"
+Cohesion: 0.27
+Nodes (5): validate_tactical_strategy(), test_extreme_difficulty_and_speed_clamped(), test_unknown_formation_rejected(), test_unknown_obstacle_rejected(), test_valid_strategy_passes()
+
+### Community 29 - "STARFALL — Antigravity Repository Audit & Completion Prompt"
+Cohesion: 0.18
+Nodes (11): Architecture and maintainability, Audit before edits, Definition of done, Frontend — textmode-inspired visual system, Gameplay analytics and reasoning quality, Gesture control correctness, Objective, Ollama / Gemma configuration (+3 more)
+
+### Community 31 - "prompts.py"
+Cohesion: 0.29
+Nodes (3): build_post_game_prompt(), build_wave_prompt(), generate_strategy_node()
+
+### Community 32 - "Local Ollama + Gemma 4 Setup"
+Cohesion: 0.25
+Nodes (8): 1. Install and verify Ollama, 2. Pull the selected model, 3. Python environment, 4. Environment values, 5. Diagnostics, 6. Performance pattern, Local Ollama + Gemma 4 Setup, Privacy and licensing
+
+### Community 33 - "Antigravity Verification Checklist"
+Cohesion: 0.29
+Nodes (6): Analytics and release, Antigravity Verification Checklist, Game, Gemma 4 and Ollama, Repository and dependencies, Vision
+
+### Community 34 - "STARFALL Architecture"
+Cohesion: 0.29
+Nodes (6): Decision lifecycle, Local setup and licensing, Model contract, Responsibilities, Runtime architecture, STARFALL Architecture
+
+### Community 35 - "STARFALL UI Design Specification"
+Cohesion: 0.33
+Nodes (5): Design language, Interaction rules, Pygame layout, STARFALL UI Design Specification, Terminal mode
+
+### Community 37 - "Phase 2 — reliable two-hand tracking with MediaPipe"
+Cohesion: 0.50
+Nodes (4): Camera preview and gesture feedback, Left hand — pinch-to-fire, Phase 2 — reliable two-hand tracking with MediaPipe, Right hand — spaceship movement
+
 ## Knowledge Gaps
 - **1 isolated node(s):** `starfall`
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 296 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **4 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 341 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `GameEngine` connect `GameEngine` to `main.py`, `engine.py`, `main.py`, `PygameRenderer`?**
-  _High betweenness centrality (0.072) - this node is a cross-community bridge._
+- **Why does `GameEngine` connect `GameEngine` to `main.py`, `engine.py`, `create_strategy_graph`, `PygameRenderer`?**
+  _High betweenness centrality (0.060) - this node is a cross-community bridge._
 - **Are the 16 inferred relationships involving `GameEngine` (e.g. with `Enemy` and `EnemyType`) actually correct?**
   _`GameEngine` has 16 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `starfall` to the rest of the system?**
   _1 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `main.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.05221518987341772 - nodes in this community are weakly interconnected._
-- **Why does `run_game()` connect `main.py` to `gesture.py`, `PygameRenderer`, `GameEngine`, `create_strategy_graph`, `InputCommand`, `OllamaClientWrapper`, `main.py`?**
-  _High betweenness centrality (0.067) - this node is a cross-community bridge._
+  _Cohesion score 0.05772005772005772 - nodes in this community are weakly interconnected._
+- **Why does `run_game()` connect `main.py` to `gesture.py`, `PygameRenderer`, `GameEngine`, `InputCommand`, `test_web_server.py`, `OllamaClientWrapper`, `create_strategy_graph`, `GestureController`, `AIStrategyOrchestrator`?**
+  _High betweenness centrality (0.056) - this node is a cross-community bridge._
 - **Are the 15 inferred relationships involving `run_game()` (e.g. with `.consume_pending_plan()` and `.get_last_evaluation()`) actually correct?**
   _`run_game()` has 15 INFERRED edges - model-reasoned connections that need verification._
 - **Should `engine.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.06842105263157895 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06498599439775911 - nodes in this community are weakly interconnected._
