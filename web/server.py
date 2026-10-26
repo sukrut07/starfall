@@ -21,7 +21,7 @@ if str(ROOT_DIR) not in sys.path:
 from config.loader import load_settings
 from persistence.database import init_database
 from persistence.repositories import MatchRepository
-from ai.ollama_client import OllamaStrategyClient
+from ai.ollama_client import OllamaClientWrapper
 from analytics.telemetry import TelemetryCollector
 from analytics.metrics import compute_metrics
 from analytics.player_profile import build_profile
@@ -92,12 +92,11 @@ class StarfallWebHandler(BaseHTTPRequestHandler):
         settings = load_settings()
         
         # Check Ollama
-        client = OllamaStrategyClient(
+        client = OllamaClientWrapper(
             endpoint=settings.ai.ollama_endpoint,
-            model_name=settings.ai.primary_model,
             timeout_seconds=5.0,
         )
-        is_healthy, msg, models = client.check_health()
+        is_healthy, msg, models = client.check_connection()
 
         # Database stats
         db_path = settings.app.database_path
@@ -118,12 +117,12 @@ class StarfallWebHandler(BaseHTTPRequestHandler):
 
         data = {
             "status": "online",
-            "app_name": settings.app.name,
+            "app_name": settings.app.title,
             "version": settings.app.version,
             "ai": {
                 "endpoint": settings.ai.ollama_endpoint,
                 "primary_model": settings.ai.primary_model,
-                "fallback_model": settings.ai.fallback_model,
+                "alternative_model": settings.ai.alternative_model,
                 "timeout_seconds": settings.ai.timeout_seconds,
                 "ollama_online": is_healthy,
                 "ollama_message": msg,
@@ -133,8 +132,9 @@ class StarfallWebHandler(BaseHTTPRequestHandler):
             },
             "gameplay": {
                 "starting_lives": settings.gameplay.starting_lives,
+                "starting_difficulty": settings.gameplay.starting_difficulty,
                 "max_difficulty": settings.gameplay.max_difficulty,
-                "base_enemy_speed": settings.gameplay.base_enemy_speed,
+                "max_projectile_speed": settings.gameplay.max_projectile_speed,
             },
             "persistence": {
                 "database_path": str(settings.app.database_path),

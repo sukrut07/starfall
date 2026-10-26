@@ -323,6 +323,11 @@ def main() -> None:
     # Command: env-check
     subparsers.add_parser("env-check", help="Run comprehensive environment diagnostic")
 
+    # Command: web
+    web_parser = subparsers.add_parser("web", help="Launch textmode web companion display inspired by textmode.art")
+    web_parser.add_argument("--host", type=str, default="127.0.0.1", help="Host address (default 127.0.0.1)")
+    web_parser.add_argument("--port", type=int, default=8000, help="Port to listen on (default 8000)")
+
     args = parser.parse_args()
 
     if args.command == "play":
@@ -385,6 +390,10 @@ def main() -> None:
     elif args.command == "env-check":
         check_all()
 
+    elif args.command == "web":
+        from web.server import start_server
+        start_server(host=args.host, port=args.port, blocking=True)
+
     else:
         # No command passed: Launch interactive terminal menu
         while True:
@@ -423,7 +432,10 @@ def main() -> None:
                 settings = load_settings()
                 display_settings_summary(settings)
                 input("\nPress Enter to return to menu...")
-            elif choice in ("9", "q"):
+            elif choice == "9":
+                from web.server import start_server
+                start_server(host="127.0.0.1", port=8000, blocking=True)
+            elif choice in ("10", "q"):
                 print("Exiting STARFALL. Dismissed, Commander.")
                 break
 
