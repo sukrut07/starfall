@@ -130,11 +130,11 @@ sequenceDiagram
 
 ### Model Options
 
-| Model Tag | Parameters | Recommended RAM | Latency (Typical) | Best Use Case |
-| :--- | :--- | :--- | :--- | :--- |
-| **`gemma4:e2b`** *(Default)* | ~2B Effective | 8 GB | ~3–7 sec | Fast responsive tactical JSON generation |
-| **`gemma4:e4b`** | ~4B Effective | 16 GB | ~8–14 sec | Higher reasoning depth across multi-wave profiles |
-| **`llama3.2:latest`** | 3B | 8 GB | ~4–8 sec | Open-source alternative adapter |
+| Model Tag | Role | Download-size guide | Notes |
+| :--- | :--- | :--- | :--- |
+| **`gemma4:e4b`** *(configured primary)* | Local tactical reasoning | Ollama currently lists approximately 6.6–9.5 GB across package variants | Verify with `ollama list`; actual RAM and latency depend on quantization and hardware. |
+| **`gemma4:e2b`** *(alternative)* | Smaller local model | Ollama currently lists approximately 4.6–7.5 GB across package variants | Switch to this if E4B is too slow or memory-intensive. |
+| Other compatible local models | Optional alternative adapter | Model-dependent | Verify schema-output compatibility and licensing before use. |
 
 > [!NOTE]
 > **Open-Weight Licensing Notice**: Gemma 4 is an open-weight model governed by Google's applicable Gemma Terms of Use. It is permitted for local development, research, and non-commercial/commercial applications under its terms. For environments requiring strictly OSI-approved licenses, STARFALL provides a configurable model adapter and deterministic offline mode.
@@ -254,7 +254,7 @@ At the end of every match, the post-game analyst compiles:
 
 ## 10. Automated Testing
 
-Run the test suite with `pytest`:
+Run the test suite locally with `pytest -q`. The repository includes the test modules listed below; test results should be reported only after running them in the target environment.
 
 ```bash
 pytest
