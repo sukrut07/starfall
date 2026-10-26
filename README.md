@@ -132,8 +132,8 @@ sequenceDiagram
 
 | Model Tag | Role | Download-size guide | Notes |
 | :--- | :--- | :--- | :--- |
-| **`gemma4:e4b`** *(configured primary)* | Local tactical reasoning | Ollama currently lists approximately 6.6–9.5 GB across package variants | Verify with `ollama list`; actual RAM and latency depend on quantization and hardware. |
-| **`gemma4:e2b`** *(alternative)* | Smaller local model | Ollama currently lists approximately 4.6–7.5 GB across package variants | Switch to this if E4B is too slow or memory-intensive. |
+| **`gemma4:e4b`** *(configured primary)* | Local tactical reasoning | [approximately 6.6–9.5 GB in the Ollama registry](https://ollama.com/library/gemma4/tags) | Verify with `ollama list`; actual RAM and latency depend on quantization and hardware. |
+| **`gemma4:e2b`** *(alternative)* | Smaller local model | [approximately 4.6–7.5 GB in the Ollama registry](https://ollama.com/library/gemma4/tags) | Switch to this if E4B is too slow or memory-intensive. |
 | Other compatible local models | Optional alternative adapter | Model-dependent | Verify schema-output compatibility and licensing before use. |
 
 > [!NOTE]
@@ -159,7 +159,7 @@ pip install -r requirements.txt
 Copy `.env.example` to `.env` and keep `.env` untracked. The example configures `OLLAMA_MODEL=gemma4:e4b`; you can change it to `gemma4:e2b` if the larger model is not suitable for your machine. Local Ollama inference does not require a cloud API key by default. See [Local Model Setup](docs/LOCAL_MODEL_SETUP.md).
 
 1. Install Ollama from [ollama.com](https://ollama.com).
-2. Pull the default Gemma 4 lightweight model:
+2. Pull the configured Gemma 4 E4B model:
    ```bash
    ollama pull gemma4:e4b
    ```
