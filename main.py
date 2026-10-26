@@ -11,6 +11,11 @@ import os
 import sys
 import time
 from pathlib import Path
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
 from typing import Optional
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
@@ -278,6 +283,10 @@ def run_game(
 
 
 def main() -> None:
+    # Load local .env values before CLI defaults; existing OS environment still wins.
+    if load_dotenv is not None:
+        load_dotenv(dotenv_path=ROOT_DIR / ".env", override=False)
+
     parser = argparse.ArgumentParser(
         description="STARFALL: Adaptive AI Arcade Shooter (Terminal / Pygame, Keyboard / Hand Gestures, Gemma 4 & LangGraph)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -289,20 +298,20 @@ def main() -> None:
     play_parser.add_argument(
         "--renderer",
         choices=["terminal", "pygame"],
-        default="terminal",
+        default=os.getenv("STARFALL_RENDERER", "terminal"),
         help="Renderer to use: 'terminal' for ASCII or 'pygame' for graphic arcade",
     )
     play_parser.add_argument(
         "--control",
         choices=["keyboard", "gesture", "mixed"],
-        default="keyboard",
+        default=os.getenv("STARFALL_CONTROL", "keyboard"),
         help="Control mode: 'keyboard', 'gesture' (two-hand vision), or 'mixed'",
     )
     play_parser.add_argument(
         "--model",
         type=str,
-        default="gemma4:e2b",
-        help="Ollama model identifier (e.g. gemma4:e2b, gemma4:e4b)",
+        default=None,
+        help="Optional Ollama model override (defaults to OLLAMA_MODEL / config; e.g. gemma4:e4b)",
     )
 
     # Command: vision-test

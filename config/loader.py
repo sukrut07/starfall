@@ -6,14 +6,14 @@ import os
 from pathlib import Path
 from typing import List, Optional
 import yaml
-from pydantic import BaseModel, Field
-
 
 try:
     from dotenv import load_dotenv
     DOTENV_AVAILABLE = True
 except ImportError:
+    load_dotenv = None
     DOTENV_AVAILABLE = False
+from pydantic import BaseModel, Field
 
 
 class AppConfig(BaseModel):
@@ -115,10 +115,9 @@ class Settings(BaseModel):
 
 
 def load_settings(config_path: Optional[str] = None) -> Settings:
-    """Load settings from YAML file with environment variable and .env overrides."""
-    if DOTENV_AVAILABLE:
-        # Load local .env if present
-        load_dotenv(override=False)
+    """Load YAML defaults, then .env values, then explicit OS environment overrides."""
+    if DOTENV_AVAILABLE and load_dotenv is not None:
+        load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env", override=False)
 
     data = {}
     if config_path is None:

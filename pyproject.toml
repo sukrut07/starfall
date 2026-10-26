@@ -22,7 +22,7 @@ dependencies = [
     "prompt_toolkit>=3.0.40",
     "PyYAML>=6.0.1",
     "pytest>=8.0.0",
-    "python-dotenv>=1.0.0",
+    "python-dotenv>=1.0.1",
 ]
 
 [project.scripts]

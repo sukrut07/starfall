@@ -131,11 +131,11 @@ sequenceDiagram
 
 ### Model Options
 
-| Model Tag | Parameters | Recommended RAM | Latency (Typical) | Best Use Case |
-| :--- | :--- | :--- | :--- | :--- |
-| **`gemma4:e2b`** *(Default)* | ~2B Effective | 8 GB | ~3–7 sec | Fast responsive tactical JSON generation |
-| **`gemma4:e4b`** | ~4B Effective | 16 GB | ~8–14 sec | Higher reasoning depth across multi-wave profiles |
-| **`llama3.2:latest`** | 3B | 8 GB | ~4–8 sec | Open-source alternative adapter |
+| Model Tag | Role | Download-size guide | Notes |
+| :--- | :--- | :--- | :--- |
+| **`gemma4:e4b`** *(configured primary)* | Local tactical reasoning | [approximately 6.6–9.5 GB in the Ollama registry](https://ollama.com/library/gemma4/tags) | Verify with `ollama list`; actual RAM and latency depend on quantization and hardware. |
+| **`gemma4:e2b`** *(alternative)* | Smaller local model | [approximately 4.6–7.5 GB in the Ollama registry](https://ollama.com/library/gemma4/tags) | Switch to this if E4B is too slow or memory-intensive. |
+| Other compatible local models | Optional alternative adapter | Model-dependent | Verify schema-output compatibility and licensing before use. |
 
 > [!NOTE]
 > **Open-Weight Licensing Notice**: Gemma 4 is an open-weight model governed by Google's applicable Gemma Terms of Use. It is permitted for local development, research, and non-commercial/commercial applications under its terms. For environments requiring strictly OSI-approved licenses, STARFALL provides a configurable model adapter and deterministic offline mode.
@@ -147,7 +147,7 @@ sequenceDiagram
 ### Step 1: Clone and Set Up Python Environment
 
 ```bash
-git clone https://github.com/your-username/starfall.git
+git clone https://github.com/sukrut07/starfall.git
 cd starfall
 
 python3.11 -m venv .venv
@@ -157,10 +157,12 @@ pip install -r requirements.txt
 
 ### Step 2: Set Up Ollama and Gemma 4
 
+Copy `.env.example` to `.env` and keep `.env` untracked. The example configures `OLLAMA_MODEL=gemma4:e4b`; you can change it to `gemma4:e2b` if the larger model is not suitable for your machine. Local Ollama inference does not require a cloud API key by default. See [Local Model Setup](docs/LOCAL_MODEL_SETUP.md).
+
 1. Install Ollama from [ollama.com](https://ollama.com).
-2. Pull the default Gemma 4 lightweight model:
+2. Pull the configured Gemma 4 E4B model:
    ```bash
-   ollama pull gemma4:e2b
+   ollama pull gemma4:e4b
    ```
 3. Verify local model availability:
    ```bash
@@ -253,7 +255,7 @@ At the end of every match, the post-game analyst compiles:
 
 ## 10. Automated Testing
 
-Run the full verified test suite with `pytest`:
+Run the full verified test suite locally with `pytest -v`:
 
 ```bash
 pytest -v
@@ -382,7 +384,18 @@ starfall/
 
 ---
 
-## 13. License
+## 13. Developer Docs
+
+- [Antigravity master audit and build prompt](docs/ANTIGRAVITY_MASTER_PROMPT.md)
+- [Antigravity gesture gameplay prompt](docs/ANTIGRAVITY_GESTURE_GAMEPLAY_PROMPT.md)
+- [Architecture and workflow diagrams](docs/ARCHITECTURE.md)
+- [Local Ollama / Gemma 4 setup](docs/LOCAL_MODEL_SETUP.md)
+- [Textmode-inspired UI specification](docs/TEXTMODE_UI_SPEC.md)
+- [Implementation verification checklist](docs/ANTIGRAVITY_AUDIT_CHECKLIST.md)
+
+---
+
+## 14. License
 
 - **Source Code**: MIT License.
 - **MediaPipe Hand Landmarker**: Apache 2.0.
